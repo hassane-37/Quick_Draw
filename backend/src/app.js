@@ -16,13 +16,13 @@ app.use(helmet());
 app.disable("x-powered-by"); // ne pas révéler qu'on utilise Express
 
 // CORS (à restreindre plus tard à ton domaine frontend)
-app.use(cors());
+app.use(cors()); 
 
 // Logs HTTP
-app.use(morgan("dev"));
+app.use(morgan("dev")); //utile pour debugger
 
 // Pour lire le JSON (limité pour éviter les gros payloads malveillants)
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "5mb" })); 
 
 // Rate limiting global
 app.use("/api", apiLimiter);
