@@ -106,4 +106,4 @@ function resendConfirmationCode(email) {
   });
 }
 
-module.exports = { signInUser, signUpUser ,confirmSignUp};
+module.exports = { signInUser, signUpUser ,confirmSignUp,resendConfirmationCode};

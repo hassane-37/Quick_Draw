@@ -9,7 +9,7 @@ async function insertUser(user) {
     Item: {
       id: user.id,             
       email: user.email,
-      first_name: user.username,
+      username: user.username,
       role: user.role || "user",
       created_at: new Date().toISOString(),
       profile_pic : user.username[0]
