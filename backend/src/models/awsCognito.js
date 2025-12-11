@@ -12,37 +12,47 @@ const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
 
 
 //SignUp
-async function signUpUser(email,password,username) {
-
+async function signUpUser(email, password, username) {
   const internalUsername = uuidv4();
-  await insertUser({
-      id:internalUsername, 
-      email:email,
-      username:username
-    });
-  return new Promise((resolve, reject) => {
-  
-    
-    
-    const params = {
-      ClientId: ENV.COGNITO_CLIENT_ID,
-      Username: internalUsername, 
-      Password: password,
-      SecretHash: getSecretHash(internalUsername, ENV.COGNITO_CLIENT_ID, ENV.COGNITO_CLIENT_SECRET),
-      UserAttributes: [
-        { Name: 'email', Value: email },
-        { Name: 'name', Value: username },
-        
-      ]
-    };
 
+  // Step 1: Insert user into DB
+  let insert = false;
+  try {
+    insert = await insertUser({ id: internalUsername, email, username });
+  } catch (err) {
+    throw new Error("DB insert failed: " + err.message);
+  }
+
+  // Stop execution if insert failed
+  if (!insert) {
+    throw new Error("DB insert returned false. Cognito signup aborted.");
+  }
+
+  // Step 2: Prepare Cognito signup
+  const params = {
+    ClientId: ENV.COGNITO_CLIENT_ID,
+    Username: internalUsername,
+    Password: password,
+    SecretHash: getSecretHash(
+      internalUsername,
+      ENV.COGNITO_CLIENT_ID,
+      ENV.COGNITO_CLIENT_SECRET
+    ),
+    UserAttributes: [
+      { Name: "email", Value: email },
+      { Name: "name", Value: username },
+    ],
+  };
+
+  // Step 3: Call Cognito
+  return new Promise((resolve, reject) => {
     cognitoIdentityServiceProvider.signUp(params, (err, data) => {
-      if (err) reject(err);
-      else resolve({
+      if (err) return reject(err);
+      resolve({
         userSub: data.UserSub,
-        email: email,
-        message: 'User created successfully. Please check email for verification code.'
-      }); 
+        email,
+        message: "User created successfully. Please check email for verification code.",
+      });
     });
   });
 }
