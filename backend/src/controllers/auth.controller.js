@@ -54,7 +54,8 @@ exports.signin =  async (req, res) => {
     //calling AWS cognito signingup service 
     const user = await signInUser(email, password);
     return res.status(201).json({
-      message: "User signed in successfully"
+      message: "User signed in successfully",
+      data : user
     });
 
   } catch (error) {
