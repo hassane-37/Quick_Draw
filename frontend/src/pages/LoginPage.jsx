@@ -31,53 +31,72 @@ function LoginPage({ onLoginSuccess, onSwitchToRegister }) {
   }
 
   return (
-    <div className="auth-container">
-      <h1>Connexion</h1>
-      
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <div>
-            <div>
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@example.com"
-          />
-        </label>
-        </div>
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <div>
+        <div className="card shadow-sm">
+          <div className="card-body">
+            <h1 className="h4 text-center mb-4">Connexion</h1>
 
-        <div>
-        <label>
-          Mot de passe
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Votre mot de passe"
-          />
-        </label>
-        </div>
-        </div>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label htmlFor="email" className="form-label">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  className="form-control"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="vous@example.com"
+                  disabled={loading}
+                />
+              </div>
 
-        {error && <p className="error-text">{error}</p>}
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">
+                  Mot de passe
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  className="form-control"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Votre mot de passe"
+                  disabled={loading}
+                />
+              </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Connexion…' : 'Se connecter'}
-        </button>
-        <p className="muted">
-          Pas encore de compte ?{' '}
-          <button
-            type="button"
-            className="link-button"
-            onClick={onSwitchToRegister}
-            disabled={loading}
-          >
-            Créer un compte
-          </button>
-        </p>
-      </form>
+              {error && (
+                <div className="alert alert-danger py-2" role="alert">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="btn btn-warning"
+                disabled={loading}
+              >
+                {loading ? 'Connexion…' : 'Se connecter'}
+              </button>
+
+              <p className="text-center text-muted mt-3 mb-0">
+                Pas encore de compte ?{' '}
+                <button
+                  type="button"
+                  className="btn btn-link p-0 align-baseline"
+                  onClick={onSwitchToRegister}
+                  disabled={loading}
+                >
+                  Créer un compte
+                </button>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
