@@ -18,13 +18,25 @@ function LoginPage({ onLoginSuccess, onSwitchToRegister }) {
     try {
       setLoading(true)
 
-      // Pour l'instant, on ne contacte pas encore le backend.
-      // On simule juste un login réussi après un petit délai.
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      const res = await fetch('http://localhost:4000/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
 
-      onLoginSuccess({ email })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.message || 'Erreur de connexion. Réessaie plus tard.')
+        return
+      }
+
+      const user = data.data || { email }
+      onLoginSuccess(user)
     } catch (err) {
-      setError("Erreur de connexion. Réessaie plus tard.")
+      setError('Erreur réseau lors de la connexion.')
     } finally {
       setLoading(false)
     }
