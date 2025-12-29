@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-function DrawingCanvas({ width = 400, height = 400, onChange }) {
+function DrawingCanvas({ width = 400, height = 400, onChange, clearTrigger }) {
   const canvasRef = useRef(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [lastPoint, setLastPoint] = useState(null)
@@ -15,6 +15,18 @@ function DrawingCanvas({ width = 400, height = 400, onChange }) {
     ctx.fillStyle = '#fff'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
   }, [])
+
+  useEffect(() => {
+    if (!clearTrigger) return
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = '#fff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+     
+    if (onChange) {
+      onChange(null)
+    }
+  }, [clearTrigger, onChange])
 
   const getPos = (e) => {
     const rect = canvasRef.current.getBoundingClientRect()
@@ -42,16 +54,19 @@ function DrawingCanvas({ width = 400, height = 400, onChange }) {
     ctx.stroke()
 
     setLastPoint(newPoint)
-
-    if (onChange) {
-      const dataUrl = canvas.toDataURL('image/png')
-      onChange(dataUrl)
-    }
   }
 
   const stopDrawing = () => {
+    if (!isDrawing) return
+
     setIsDrawing(false)
     setLastPoint(null)
+
+    if (onChange) {
+      const canvas = canvasRef.current
+      const dataUrl = canvas.toDataURL('image/png')
+      onChange(dataUrl)
+    }
   }
 
   const handleClear = () => {

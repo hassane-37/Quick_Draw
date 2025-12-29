@@ -39,68 +39,104 @@ function RegisterPage({ onRegisterSuccess, onSwitchToLogin }) {
   }
 
   return (
-    <div className="auth-container">
-      <h1>Inscription</h1>
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="vous@example.com"
-          />
-        </label>
+  <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div>
+      <div className="card shadow-sm">
+        <div className="card-body">
+          <h1 className="h4 text-center mb-4">Inscription</h1>
 
-        <label>
-          Nom d'utilisateur
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Votre pseudo"
-          />
-        </label>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label">
+              Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                className="form-control"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="vous@example.com"
+                disabled={loading}
+              />
+            </div>
 
-        <label>
-          Mot de passe
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Votre mot de passe"
-          />
-        </label>
+            <div className="mb-3">
+              <label htmlFor="username" className="form-label">
+              Nom d'utilisateur
+              </label>
+              <input
+                id="username"
+                type="text"
+                className="form-control"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Votre pseudo"
+                disabled={loading}
+              />
+            </div>
 
-        <label>
-          Confirmer le mot de passe
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirmez votre mot de passe"
-          />
-        </label>
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label">
+              Mot de passe
+              </label>
+              <input
+                id="password"
+                type="password"
+                className="form-control"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Votre mot de passe"
+                disabled={loading}
+              />
+            </div>
 
-        {error && <p className="error-text">{error}</p>}
+            <div className="mb-3">
+              <label htmlFor="confirmPassword" className="form-label">
+              Confirmer le mot de passe
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                className="form-control"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirmez votre mot de passe"
+                disabled={loading}
+              />
+            </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Inscription…" : "S'inscrire"}
-        </button>
-        <p className="muted">
-          Déjà un compte ?{' '}
-          <button
-            type="button"
-            className="link-button"
-            onClick={onSwitchToLogin}
-            disabled={loading}
-          >
-            Se connecter
-          </button>
-        </p>
-      </form>
+            {error && (
+              <div className="alert alert-danger py-2" role="alert">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-warning"
+              disabled={loading}
+            >
+              {loading ? "Inscription…" : "S'inscrire"}
+            </button>
+
+            <p className="text-center text-muted mt-3 mb-0">
+              Déjà un compte ?{' '}
+              <button
+                type="button"
+                className="btn btn-warning"
+                onClick={onSwitchToLogin}
+                disabled={loading}
+              >
+              Se connecter
+              </button>
+            </p>
+          </form>
+        </div>
+      </div>
     </div>
-  )
+  </div>
+)
 }
 
 export default RegisterPage
