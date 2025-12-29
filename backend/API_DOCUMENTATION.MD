@@ -222,5 +222,16 @@ curl -X POST http://localhost:3000/api/auth/signin \
 - ✅ Rate limiting on authentication attempts
 
 ---
+#Faire un dockerfile de backend et on va appeler les services aws via les variables d'env 
+docker run -p 4000:4000 ^
+  -e AWS_REGION=eu-west-1 ^
+  -e COGNITO_USER_POOL_ID=... ^
+  -e COGNITO_CLIENT_ID=... ^
+  -e COGNITO_CLIENT_SECRET=... ^
+  -e AWS_ACCESS_KEY_ID=... ^
+  -e AWS_SECRET_ACCESS_KEY=... ^
+  -e DYNAMODB_TABLE_NAME=... ^
+  quickdraw-backend
 
+Cette approche permet à toute l’équipe de travailler avec la même configuration sans dépendre d’installations AWS locales.
 **Last Updated:** December 2025

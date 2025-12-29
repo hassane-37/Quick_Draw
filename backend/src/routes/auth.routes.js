@@ -4,11 +4,11 @@ const router = express.Router();
 const signupController = require("../controllers/auth.controller");
 
 
-//signup
+//signup s'inscrire
 router.post("/signup",signupController.signup);
 //confirm email
 router.post("/confirmEmail",signupController.signupConfirm);
-//signin
+//signin se connecter
 router.post("/signin",signupController.signin);
 
 

@@ -25,14 +25,26 @@ function RegisterPage({ onRegisterSuccess, onSwitchToLogin }) {
     try {
       setLoading(true)
 
-      // TODO: remplacer par un appel à ton backend /api/auth/register
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      const res = await fetch('http://localhost:4000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, username }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.message || "Erreur lors de l'inscription. Réessaie plus tard.")
+        return
+      }
 
       if (onRegisterSuccess) {
         onRegisterSuccess({ email, username })
       }
     } catch (err) {
-      setError("Erreur lors de l'inscription. Réessaie plus tard.")
+      setError("Erreur réseau lors de l'inscription.")
     } finally {
       setLoading(false)
     }
