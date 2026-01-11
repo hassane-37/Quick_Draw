@@ -11,36 +11,36 @@ const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
 });
 
 
-//SignUp
+// SignUp
 async function signUpUser(email, password, username) {
-  const internalUsername = uuidv4();
+  const internalUserId = uuidv4(); // ID interne pour DynamoDB uniquement
 
   // Step 1: Insert user into DB
   let insert = false;
   try {
-    insert = await insertUser({ id: internalUsername, email, username });
+    insert = await insertUser({ id: internalUserId, email, username });
   } catch (err) {
     throw new Error("DB insert failed: " + err.message);
   }
 
-  // Stop execution if insert failed
   if (!insert) {
     throw new Error("DB insert returned false. Cognito signup aborted.");
   }
 
-  // Step 2: Prepare Cognito signup
+  // Step 2: Prepare Cognito signup (USERNAME = email)
   const params = {
     ClientId: ENV.COGNITO_CLIENT_ID,
-    Username: internalUsername,
+    Username: email, 
     Password: password,
     SecretHash: getSecretHash(
-      internalUsername,
+      email, 
       ENV.COGNITO_CLIENT_ID,
       ENV.COGNITO_CLIENT_SECRET
     ),
     UserAttributes: [
       { Name: "email", Value: email },
       { Name: "name", Value: username },
+      
     ],
   };
 
