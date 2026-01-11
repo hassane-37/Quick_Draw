@@ -1,7 +1,15 @@
 // src/config/env.js
 const dotenv = require("dotenv");
+const path = require("path");
 
-dotenv.config(); // charge les variables depuis .env
+// Charge les variables depuis .env en spécifiant le chemin absolu
+const result = dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+
+if (result.error) {
+  console.warn("  Fichier .env non trouvé ou erreur de lecture. Utilisation des variables système.");
+} else {
+  console.log("  Fichier .env chargé avec succès.");
+}
 
 const ENV = {
   NODE_ENV: process.env.NODE_ENV || "development",
