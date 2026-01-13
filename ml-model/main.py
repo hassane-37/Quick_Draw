@@ -26,6 +26,8 @@ app = FastAPI(title="Model API")
 # Le modèle est chargé UNE SEULE FOIS au démarrage
 MODEL_PATH = "E:\\TSE\\FISE3\\SPE_INFO_Big_Data_management_and_analysis\\Projet Big Data\\doodle_classifier_model.h5"
 
+
+
 model = keras.models.load_model(MODEL_PATH)
 
 # =========================
