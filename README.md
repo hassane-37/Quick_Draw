@@ -75,6 +75,13 @@ npm install
 npm run dev
 </pre>
 
+<p>NOTE!!!: WHEN YOU RUN THE FRONTEND ,IN THE SIGNIN PAGE ENTER : </p>
+
+<pre>
+saadrouisse01@gmail.com
+123Saad@123
+</pre>
+
 <hr/>
 
 <h3>Machine Learning Server</h3>
@@ -90,4 +97,5 @@ uvicorn ml_server:app --reload --port 8000
 <hr/>
 </body>
 </html>
+
 
