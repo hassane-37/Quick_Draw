@@ -1,0 +1,13 @@
+.fixed-image {
+position: fixed;
+bottom: -40px;
+left: -40px;
+width: 25%;      
+height: auto;
+z-index: 10;         
+pointer-events: none; 
+}
+
+body {
+  background-color: #ffd139;
+}
