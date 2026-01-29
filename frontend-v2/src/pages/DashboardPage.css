@@ -1,0 +1,145 @@
+span{
+  font-family: monospace;
+}
+.dashboard {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* HERO */
+.dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #ffd139, #ffea9f);
+  padding: 2rem;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+}
+
+.dashboard-hero h1 {
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+}
+
+.hero-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+/* STATS */
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/* PLAY */
+.play-section h2 {
+  margin-bottom: 1rem;
+}
+
+.btn-container {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: 14px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn.primary {
+  background: #222;
+  color: white;
+}
+
+.btn.secondary {
+  background: white;
+  border: 2px solid #222;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+/* ACTIVITY */
+.activity {
+  margin-top: 3rem;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem;
+  border-radius: 18px;
+}
+
+.activity ul {
+  margin-top: 1rem;
+  list-style: none;
+}
+
+.activity li {
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+/* FIXED IMAGE */
+.fixed-image-inv {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 280px;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+p{
+    font-family: monospace;
+}
+  
+h1{
+    font-family: monospace;
+}
+h2 ,li{
+    font-family: monospace;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
