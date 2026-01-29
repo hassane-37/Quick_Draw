@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import './App.css'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
@@ -29,31 +30,53 @@ function App() {
       `Mot : ${result.word}\nCatégorie : ${result.category}\nTemps : ${result.time}s\nTentatives : ${result.attempts}`,
     )
   }
-
-  if (!user) {
-    if (authView === 'register') {
-      return (
-        <RegisterPage
-          onRegisterSuccess={handleRegisterSuccess}
-          onSwitchToLogin={() => setAuthView('login')}
-        />
-      )
-    }
-
-    return (
-      <LoginPage
-        onLoginSuccess={handleLoginSuccess}
-        onSwitchToRegister={() => setAuthView('register')}
-      />
-    )
-  }
-
   return (
-    <GamePage
-      user={user}
-      onLogout={handleLogout}
-      onGameFinished={handleGameFinished}
-    />
+    <Routes>
+      {/* Page de connexion */}
+      <Route
+        path="/login"
+        element={
+          !user ? (
+            <LoginPage
+              onLoginSuccess={handleLoginSuccess}
+              onSwitchToRegister={() => setAuthView('register')}
+            />
+          ) : (
+            <Navigate to="/game" replace />
+          )
+        }
+      />
+
+      {/* Page d'inscription */}
+      <Route
+        path="/register"
+        element={
+          !user ? (
+            <RegisterPage
+              onRegisterSuccess={handleRegisterSuccess}
+              onSwitchToLogin={() => setAuthView('login')}
+            />
+          ) : (
+            <Navigate to="/game" replace />
+          )
+        }
+      />
+
+      {/* Page de jeu (accessible même sans login pour l'instant) */}
+      <Route
+        path="/game"
+        element={
+          <GamePage
+            user={user}
+            onLogout={handleLogout}
+            onGameFinished={handleGameFinished}
+          />
+        }
+      />
+
+      {/* Redirection par défaut vers /game */}
+      <Route path="*" element={<Navigate to="/game" replace />} />
+    </Routes>
   )
 }
 

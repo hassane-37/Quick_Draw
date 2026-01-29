@@ -147,7 +147,7 @@ function GamePage({ user, onLogout, onGameFinished }) {
       <div>
         <h1 className="h3 mb-1">Quick Draw - FISE3</h1>
         <p className="mb-0 text-muted">
-          Connecté en tant que <strong>{user.email}</strong>
+          Connecté en tant que <strong>{user?.email || 'invité'}</strong>
         </p>
       </div>
       <button
