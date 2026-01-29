@@ -26,12 +26,12 @@
 <h3>Backend</h3>
 
 <p>
-Log in to the AWS Lab using the provided credentials:
+Log in to the AWS Lab using my credentials:
 </p>
 
 <ul>
-  <li><b>Email:</b> <i>(provided by AWS Lab)</i></li>
-  <li><b>Password:</b> <i>(provided by AWS Lab)</i></li>
+  <li><b>Email:</b> <i>saad.rouyass@telecom-st-etienne.fr</i></li>
+  <li><b>Password:</b> <i>(check Whatsapp group)</i></li>
 </ul>
 
 <p>
@@ -90,3 +90,4 @@ uvicorn ml_server:app --reload --port 8000
 <hr/>
 </body>
 </html>
+
