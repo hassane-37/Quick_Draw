@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import './App.css'
-import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import GamePage from './pages/GamePage'
+import LoginPage from './pages/LoginPage'
+
+import { GamePageV2 } from './pages/GamePageV2'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -49,7 +51,7 @@ function App() {
   }
 
   return (
-    <GamePage
+    <GamePageV2
       user={user}
       onLogout={handleLogout}
       onGameFinished={handleGameFinished}
