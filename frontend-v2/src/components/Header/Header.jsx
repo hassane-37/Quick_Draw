@@ -9,7 +9,7 @@ export default function Header({ id, bgColor }) {
 
       <div className="header__github">
         <a
-          href="https://github.com/your-username"
+          href="https://github.com/hassane-37/Quick_Draw"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub repository"
