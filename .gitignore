@@ -8,3 +8,8 @@ __pycache__/
 ml-model/
 frontend/
 screenshots/
+.env
+*.env
+backend/.env
+**/.env
+

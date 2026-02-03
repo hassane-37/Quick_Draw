@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./Canvas.css";
 import StatPage from "../../pages/StatePage";
+import { jwtDecode } from "jwt-decode";
 
 const LABELS = ["Bicycle", "Eiffel Tower", "Pizza", "Cat", "Cloud", "Apple", "Tree", "Car", "Sun", "House"];
 const CNN_LABELS = ["Car","Bycicle","Dog","Bird","Hammer","Cat","Apple","House","Tree"];
@@ -159,18 +160,54 @@ export default function DrawingCanvas({
   };
 
   const nextRound = () => {
-    
     setTransition(true);
+    
+    const newPrediction = { word: keywords[round], prediction, confidence };
+    const updatedPredictions = [...gamePrediction, newPrediction];
+    
     setTimeout(() => {
       clearCanvas();
       setTimeLeft(20);
       setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
       setTransition(false);
     }, 500);
-    setGamePrediction(prev => [...prev, {word: keywords[round], prediction, confidence}]);
-    console.log("Game Predictions so far:", gamePrediction);
+    
+    setGamePrediction(updatedPredictions);
+    console.log("Game Predictions so far:", updatedPredictions);
+    
     if (round + 1 === roundsCount) {
-        setGameOver(true);
+      // Sauvegarder la partie avant de terminer
+      saveGameToBackend(updatedPredictions);
+      setGameOver(true);
+    }
+  };
+  const saveGameToBackend = async (predictions) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      // Décoder le token pour obtenir l'user_id
+      const decoded = jwtDecode(token);
+      const user_id = decoded.sub || decoded.username;
+
+      const response = await fetch("http://localhost:4000/api/games/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          user_id,
+          model_type: route === "predict_cnn" ? "cnn" : "lstm",
+          rounds: predictions
+        })
+      });
+
+      if (response.ok) {
+        console.log("Game saved successfully");
+      }
+    } catch (err) {
+      console.error("Error saving game:", err);
     }
   };
   if (gameOver) {

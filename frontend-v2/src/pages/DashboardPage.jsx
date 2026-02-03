@@ -1,12 +1,61 @@
 import { FaGamepad, FaUsers, FaTrophy } from "react-icons/fa";
 import Header from "../components/Header/Header";
 import { Card } from "../components/Card/Card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MultiCards from "../components/MultipleCards";
 import "./DashboardPage.css";
+import { jwtDecode } from "jwt-decode";
 
 function DashboardPage() {
-    const [showModeCards, setShowModeCards] = useState(false);
+  const [showModeCards, setShowModeCards] = useState(false);
+  const [stats, setStats] = useState({
+    games_played: 0,
+    wins: 0,
+    top_score: 0,
+    recent_games: []
+  });
+  const [username, setUsername] = useState("User");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const decoded = jwtDecode(token);
+        const user_id = decoded.sub || decoded.username;
+        setUsername(decoded.name || decoded.username || "User");
+
+        const response = await fetch(
+          `http://localhost:4000/api/games/stats/${user_id}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          setStats(result.data);
+        }
+      } catch (err) {
+        console.error("Error fetching stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  // Formater l'activité récente
+  const formatActivity = (game) => {
+    const won = game.correct_count >= Math.ceil(game.total_rounds / 2);
+    return `${won ? "Won" : "Lost"} a ${game.model_type?.toUpperCase() || "Classic"} game ${game.correct_count}/${game.total_rounds}`;
+  };
+
   return (
     <>
       <Header id={1} bgColor="#ffd139" />
@@ -15,20 +64,20 @@ function DashboardPage() {
         {/* HERO SECTION */}
         <section className="dashboard-hero">
           <div>
-            <h1>Welcome back User</h1>
+            <h1>Welcome back {username}</h1>
             <p>Track your progress and start a new game</p>
           </div>
           <div className="hero-badge">
             <FaTrophy />
-            <span>Level 5</span>
+            <span>Level {Math.floor(stats.games_played / 5) + 1}</span>
           </div>
         </section>
 
         {/* STATS */}
         <section className="cards-container">
-          <Card title="Games Played" value={4} />
-          <Card title="Wins" value={18} />
-          <Card title="Top Score" value={781} />
+          <Card title="Games Played" value={loading ? "..." : stats.games_played} />
+          <Card title="Wins" value={loading ? "..." : stats.wins} />
+          <Card title="Top Score" value={loading ? "..." : stats.top_score} />
         </section>
 
         {/* PLAY SECTION */}
@@ -70,9 +119,15 @@ function DashboardPage() {
         <section className="activity">
           <h2>Recent Activity</h2>
           <ul>
-            <li> Won a Classic game 4/6</li>
-            <li> Lost a Classic game 2/6</li>
-            <li> Lost a Classic game 2/6</li>
+            {loading ? (
+              <li>Loading...</li>
+            ) : stats.recent_games.length === 0 ? (
+              <li>No games played yet. Start playing!</li>
+            ) : (
+              stats.recent_games.map((game, idx) => (
+                <li key={game.id || idx}>{formatActivity(game)}</li>
+              ))
+            )}
           </ul>
         </section>
 
