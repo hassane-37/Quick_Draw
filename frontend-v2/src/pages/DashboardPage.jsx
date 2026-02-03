@@ -21,11 +21,17 @@ function DashboardPage() {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) return;
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
         const decoded = jwtDecode(token);
-        const user_id = decoded.sub || decoded.username;
-        setUsername(decoded.name || decoded.username || "User");
+        // Cognito utilise 'sub' pour l'ID unique, mais on peut aussi avoir 'username'
+        const user_id = decoded.sub || decoded.username || decoded["cognito:username"];
+        setUsername(decoded.name || decoded["name"] || "User");
+
+        console.log("Fetching stats for user_id:", user_id);
 
         const response = await fetch(
           `http://localhost:4000/api/games/stats/${user_id}`,
@@ -38,7 +44,10 @@ function DashboardPage() {
 
         if (response.ok) {
           const result = await response.json();
+          console.log("Stats received:", result.data);
           setStats(result.data);
+        } else {
+          console.error("Failed to fetch stats:", response.status);
         }
       } catch (err) {
         console.error("Error fetching stats:", err);

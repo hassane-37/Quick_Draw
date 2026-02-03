@@ -6,6 +6,9 @@ exports.saveGame = async (req, res) => {
   try {
     const { user_id, model_type, rounds } = req.body;
 
+    console.log("Saving game for user:", user_id);
+    console.log("Rounds data:", JSON.stringify(rounds, null, 2));
+
     if (!user_id || !rounds || !Array.isArray(rounds)) {
       return res.status(400).json({
         message: "Missing required fields",
@@ -30,9 +33,12 @@ exports.saveGame = async (req, res) => {
       total_rounds: rounds.length
     };
 
+    console.log("Game object to save:", game);
+
     const success = await insertGame(game);
 
     if (success) {
+      console.log("Game saved successfully with id:", game.id);
       return res.status(201).json({
         message: "Game saved successfully",
         data: game

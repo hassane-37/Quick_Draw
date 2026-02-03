@@ -1,5 +1,14 @@
-//This flie will define AWS dynamodb object and dynamo db operations like READ,WRITE...
+//This file will define AWS dynamodb object and dynamo db operations like READ,WRITE...
 const AWS = require("aws-sdk");
+
+// Configurer AWS avec les credentials depuis les variables d'environnement
+AWS.config.update({
+  region: process.env.AWS_REGION || "us-east-1",
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  sessionToken: process.env.AWS_SESSION_TOKEN
+});
+
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
 //Creating a user in dynamo db

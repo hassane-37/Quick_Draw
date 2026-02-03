@@ -14,10 +14,8 @@ export default function DrawingCanvas({
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
   
-
   const lastPos = useRef({ x: 0, y: 0 });
   
-
   const [drawingData, setDrawingData] = useState([]);
   
   const [round, setRound] = useState(0);
@@ -33,6 +31,44 @@ export default function DrawingCanvas({
   if (route=='predict_cnn') {
     keywords = ['Apple','House','Cat','Tree','Bycicle','Dog'];
   }
+
+  /* ------------------ Save Game to Backend ------------------ */
+  const saveGameToBackend = async (predictions) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.log("No token found, skipping save");
+        return;
+      }
+
+      const decoded = jwtDecode(token);
+      const user_id = decoded.sub || decoded.username || decoded["cognito:username"];
+
+      console.log("Saving game for user:", user_id);
+
+      const response = await fetch("http://localhost:4000/api/games/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          user_id,
+          model_type: route === "predict_cnn" ? "cnn" : "lstm",
+          rounds: predictions
+        })
+      });
+
+      if (response.ok) {
+        console.log("Game saved successfully");
+      } else {
+        console.error("Failed to save game:", await response.text());
+      }
+    } catch (err) {
+      console.error("Error saving game:", err);
+    }
+  };
+
   /* ------------------ API Function ------------------ */
   const sendToML = async (dataToSend) => {
     if (dataToSend.length < 5) return;
@@ -103,10 +139,8 @@ export default function DrawingCanvas({
     ctxRef.current.beginPath();
     ctxRef.current.moveTo(x, y);
 
- 
     let dx = 0;
     let dy = 0;
-
 
     if (drawingData.length > 0) {
       dx = x - lastPos.current.x;
@@ -124,11 +158,9 @@ export default function DrawingCanvas({
     ctxRef.current.lineTo(x, y);
     ctxRef.current.stroke();
 
- 
     const dx = x - lastPos.current.x;
     const dy = y - lastPos.current.y;
 
-  
     setDrawingData(prev => [...prev, [dx, dy, 1]]);
     
     lastPos.current = { x, y };
@@ -142,15 +174,12 @@ export default function DrawingCanvas({
     setDrawingData(prev => {
       if (prev.length === 0) return prev;
       const updated = [...prev];
-   
       updated[updated.length - 1][2] = 0; 
       
-    
       sendToML(updated);
       return updated;
     });
   };
-
 
   const clearCanvas = () => {
     ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -160,11 +189,10 @@ export default function DrawingCanvas({
   };
 
   const nextRound = () => {
-    setTransition(true);
-    
     const newPrediction = { word: keywords[round], prediction, confidence };
     const updatedPredictions = [...gamePrediction, newPrediction];
     
+    setTransition(true);
     setTimeout(() => {
       clearCanvas();
       setTimeLeft(20);
@@ -176,43 +204,15 @@ export default function DrawingCanvas({
     console.log("Game Predictions so far:", updatedPredictions);
     
     if (round + 1 === roundsCount) {
-      // Sauvegarder la partie avant de terminer
       saveGameToBackend(updatedPredictions);
       setGameOver(true);
     }
   };
-  const saveGameToBackend = async (predictions) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
 
-      // Décoder le token pour obtenir l'user_id
-      const decoded = jwtDecode(token);
-      const user_id = decoded.sub || decoded.username;
-
-      const response = await fetch("http://localhost:4000/api/games/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          user_id,
-          model_type: route === "predict_cnn" ? "cnn" : "lstm",
-          rounds: predictions
-        })
-      });
-
-      if (response.ok) {
-        console.log("Game saved successfully");
-      }
-    } catch (err) {
-      console.error("Error saving game:", err);
-    }
-  };
   if (gameOver) {
-  return <StatPage stats={gamePrediction} />;
+    return <StatPage stats={gamePrediction} />;
   }
+
   return (
     <div className={`fullscreen-app ${transition ? "fade-out" : ""}`}>
       <canvas
@@ -241,7 +241,6 @@ export default function DrawingCanvas({
         </div>
       </div>
 
-      {/* I SEE... FLOATING UI */}
       {prediction && (
         <div className="prediction-bubble">
           <p>I see <strong>{prediction}</strong></p>
