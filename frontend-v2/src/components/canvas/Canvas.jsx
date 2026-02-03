@@ -9,30 +9,27 @@ const CNN_LABELS = ["Car","Bycicle","Dog","Bird","Hammer","Cat","Apple","House",
 export default function DrawingCanvas({ 
   roundsCount = 6, 
   keywords = ["Tree", "Pizza", "Car", "House", "Cloud","Sun"],
-   route = "predict"
+  route = "predict"
 }) {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
-  
   const lastPos = useRef({ x: 0, y: 0 });
-  
+
   const [drawingData, setDrawingData] = useState([]);
-  
   const [round, setRound] = useState(0);
   const [timeLeft, setTimeLeft] = useState(20);
   const [isDrawing, setIsDrawing] = useState(false);
   const [transition, setTransition] = useState(false);
   const [prediction, setPrediction] = useState("");
   const [confidence, setConfidence] = useState(0);
-
   const [gamePrediction, setGamePrediction] = useState([]);
   const [gameOver, setGameOver] = useState(false);
 
-  if (route=='predict_cnn') {
+  if (route === 'predict_cnn') {
     keywords = ['Apple','House','Cat','Tree','Bycicle','Dog'];
   }
 
-  /* ------------------ Save Game to Backend ------------------ */
+  /* ------------------ SAUVEGARDE EN BASE ------------------ */
   const saveGameToBackend = async (predictions) => {
     try {
       const token = localStorage.getItem("token");
@@ -44,7 +41,8 @@ export default function DrawingCanvas({
       const decoded = jwtDecode(token);
       const user_id = decoded.sub || decoded.username || decoded["cognito:username"];
 
-      console.log("Saving game for user:", user_id);
+      console.log("💾 Saving game for user:", user_id);
+      console.log("📊 Predictions:", predictions);
 
       const response = await fetch("http://localhost:4000/api/games/save", {
         method: "POST",
@@ -59,13 +57,15 @@ export default function DrawingCanvas({
         })
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
-        console.log("Game saved successfully");
+        console.log("✅ Game saved successfully:", data);
       } else {
-        console.error("Failed to save game:", await response.text());
+        console.error("❌ Failed to save game:", data);
       }
     } catch (err) {
-      console.error("Error saving game:", err);
+      console.error("❌ Error saving game:", err);
     }
   };
 
@@ -189,7 +189,12 @@ export default function DrawingCanvas({
   };
 
   const nextRound = () => {
-    const newPrediction = { word: keywords[round], prediction, confidence };
+    // Créer l'objet de prédiction pour ce round
+    const newPrediction = { 
+      word: keywords[round], 
+      prediction, 
+      confidence 
+    };
     const updatedPredictions = [...gamePrediction, newPrediction];
     
     setTransition(true);
@@ -201,9 +206,11 @@ export default function DrawingCanvas({
     }, 500);
     
     setGamePrediction(updatedPredictions);
-    console.log("Game Predictions so far:", updatedPredictions);
-    
+    console.log("📝 Round", round + 1, "completed:", newPrediction);
+
+    // Si c'est le dernier round, sauvegarder la partie
     if (round + 1 === roundsCount) {
+      console.log("🎮 Game finished! Saving to database...");
       saveGameToBackend(updatedPredictions);
       setGameOver(true);
     }

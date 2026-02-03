@@ -18,12 +18,12 @@ const { v4: uuidv4 } = require("uuid");
 async function testGameOperations() {
   const testUserId = "test-user-" + Date.now();
   
-  console.log("🧪 Testing game operations...\n");
+  console.log(" Testing game operations...\n");
   console.log("User ID:", testUserId);
   console.log("AWS Region:", process.env.AWS_REGION);
 
   // Test 1: Insert a game
-  console.log("\n1️⃣ Testing insertGame...");
+  console.log("\n1️ Testing insertGame...");
   const game = {
     id: uuidv4(),
     user_id: testUserId,
@@ -39,20 +39,20 @@ async function testGameOperations() {
   };
 
   const insertResult = await insertGame(game);
-  console.log("Insert result:", insertResult ? "✅ Success" : "❌ Failed");
+  console.log("Insert result:", insertResult ? " Success" : "❌ Failed");
 
   // Test 2: Get games by user
-  console.log("\n2️⃣ Testing getGamesByUserId...");
+  console.log("\n2️ Testing getGamesByUserId...");
   const games = await getGamesByUserId(testUserId);
   console.log("Games found:", games.length);
   console.log("Games:", JSON.stringify(games, null, 2));
 
   // Test 3: Get user stats
-  console.log("\n3️⃣ Testing getUserStats...");
+  console.log("\n3️ Testing getUserStats...");
   const stats = await getUserStats(testUserId);
   console.log("Stats:", JSON.stringify(stats, null, 2));
 
-  console.log("\n✅ All tests completed!");
+  console.log("\n All tests completed!");
 }
 
 testGameOperations().catch(console.error);
