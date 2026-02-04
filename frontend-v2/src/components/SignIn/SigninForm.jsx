@@ -32,19 +32,22 @@ export const FormSignIn = () => {
         }
       );
 
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || 'Sign in failed');
       }
-      const accessToken = data.data.accessToken;
 
-      localStorage.setItem('token', accessToken);
+      // Prendre en charge le token custom JWT renvoyé par le backend
+      const jwtToken = data.token || data?.data?.accessToken; // fallback si ancienne réponse
+      if (!jwtToken) {
+        throw new Error('No token returned from server');
+      }
+
+      // Stocker UNIQUEMENT le token (les infos utilisateur seront récupérées via /api/auth/me)
+      localStorage.setItem('token', jwtToken);
       navigate('/dashboard');
-      console.log(accessToken); 
-
-    
-
     } catch (err) {
       setError(err.message);
     } finally {

@@ -5,8 +5,30 @@ import { useState } from "react";
 import MultiCards from "../components/MultipleCards";
 import "./DashboardPage.css";
 
+import { useAuth } from "../components/hooks/useAuth";
+
+
+ 
+
 function DashboardPage() {
+    const { user, loading } = useAuth();
     const [showModeCards, setShowModeCards] = useState(false);
+    
+    if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        backgroundColor: '#ffd139'
+      }}>
+        <h2>Loading dashboard...</h2>
+      </div>
+    );
+  }
+
+
   return (
     <>
       <Header id={1} bgColor="#ffd139" />
@@ -15,7 +37,7 @@ function DashboardPage() {
         {/* HERO SECTION */}
         <section className="dashboard-hero">
           <div>
-            <h1>Welcome back User</h1>
+            <h1>Welcome back {user?.username || user?.email || 'Player'}!</h1>
             <p>Track your progress and start a new game</p>
           </div>
           <div className="hero-badge">

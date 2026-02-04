@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 
 dotenv.config(); // charge les variables depuis .env
 
+
 const ENV = {
   NODE_ENV: process.env.NODE_ENV || "development",
   PORT: process.env.PORT || 4000,
@@ -12,7 +13,8 @@ const ENV = {
   AWS_REGION : process.env.AWS_REGION || "us-east-1",
   COGNITO_USER_POOL_ID : process.env.COGNITO_USER_POOL_ID,
   COGNITO_CLIENT_ID : process.env.COGNITO_CLIENT_ID,
-  COGNITO_CLIENT_SECRET : process.env.COGNITO_CLIENT_SECRET 
+  COGNITO_CLIENT_SECRET : process.env.COGNITO_CLIENT_SECRET,
+  JWT_SECRET: process.env.JWT_SECRET || 'dev-secret-key' // à personnaliser en prod
 };
 
 module.exports = ENV;
