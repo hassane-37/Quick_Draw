@@ -12,6 +12,7 @@ const wss = new WebSocket.Server({ server });
 const gameSessions = {}; // Private room storage
 const onlineGameQueue = []; // Matchmaking queue
 const ongoingMatches = {}; // WHERE RESULTS ARE STORED
+const usernames = []; // Map playerID to username
 
 wss.on("connection", (ws) => {
     console.log("WS client connected");
@@ -48,6 +49,17 @@ wss.on("connection", (ws) => {
                     player2.ws.send(payload);
                 }
             } 
+            else if (data.type === "SET_USERNAME") {
+               // For simplicity, we just store the last username set. In production, you'd want a better mapping.
+              if (usernames[0]) {
+                usernames[1] = data.username;
+              } else {
+                usernames[0] = data.username;
+              }
+              console.log("Usernames updated:", usernames);
+
+              console.log("Username set for player:", data.username);
+            }
 
             else if (data.type === "CHECK_GAME") {
                 // Private lobby logic
@@ -84,6 +96,7 @@ wss.on("connection", (ws) => {
                     const payload = JSON.stringify({
                         type: "BOTH_PLAYERS_ENDED",
                         results: match.results, // Send the whole results object
+                        
                     });
 
                     match.players.forEach((pid) => {

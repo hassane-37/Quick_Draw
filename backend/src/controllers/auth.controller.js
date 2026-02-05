@@ -1,7 +1,7 @@
 const {signInUser,signUpUser,confirmSignUp} = require("../models/awsCognito")
 //for AWS dynamoDB
 const {getUserIdByEmail} = require("../models/dynamodb")
-
+const { getUserNameByEmail } = require("../models/dynamodb");
 
 
 exports.signup = async (req, res) => {
@@ -51,9 +51,15 @@ exports.signin =  async (req, res) => {
   try {
     const { email, password} = req.body;
 
+    if(!email || !password){
+      return res.status(400).json({
+        message: "Missing required fields"
+      });
+    }
+
     //calling AWS cognito signingup service 
     const user = await signInUser(email, password);
-    return res.status(201).json({
+    return res.status(200).json({
       message: "User signed in successfully",
       data : user
     });
@@ -61,36 +67,98 @@ exports.signin =  async (req, res) => {
   } catch (error) {
     console.error("Signin error:", error);
 
-    return res.status(500).json({
-      message: "Error signing in user",
-      error: error.message
+      if (error.code === 'UserNotFoundException' || 
+        error.code === 'NotAuthorizedException') {
+    return res.status(401).json({
+      message: "User not found"
     });
+  }
+  if(error.code === 'UserNotConfirmedException') {
+    return res.status(403).json({
+      message: "User not confirmed. Please confirm your email."
+    });
+  }
+  return res.status(500).json({
+    message: "Error signing in user",
+    error: error.message
+  });
   }
 };
 
 exports.signupConfirm = async (req, res) => {
   try {
 
-    const {email, code} = req.body;
+    const {username, code} = req.body;
+
     
-    const getId = await getUserIdByEmail(email)
-    const id = getId.id
+    
+    // const getId = await getUserIdByEmail(email)
+    // const id = getId.id
+
+    if(!username || !code){
+      return res.status(400).json({
+        message: "Missing required fields",
+        required: ["username", "code"]
+      });
+    }
 
 
-
-
-    await confirmSignUp(id,code)
-    return res.status(201).json({
+    await confirmSignUp(username,code)
+    return res.status(200).json({
       message: "User confirmed his account successfully"
     });
 
   } catch (error) {
-    console.error("Signin error:", error);
+    console.error("Confirmation error:", error);
 
-    return res.status(500).json({
+    if(error.code === 'CodeMismatchException') {
+      return res.status(400).json({
+        message: "Invalid confirmation code"
+      });
+    }
+
+    if(error.code === 'ExpiredCodeException') {
+      return res.status(400).json({
+        message: "Confirmation code has expired"
+      });
+    }
+
+    if(error.code === 'UserNotFoundException') {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    return res.status(400).json({
       message: "Error confirming user account",
       error: error.message
     });
   }
 };
 
+exports.userNameByEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        message: "Missing required field: email"
+      });
+    }
+    const username = await getUserNameByEmail(email);
+    if (!username) {
+      return res.status(404).json({ 
+        message: "User not found"
+      });
+    }
+    return res.status(200).json({
+      message: "Username retrieved successfully",
+      username: username
+    });
+  } catch (error) {
+    console.error("Error retrieving username:", error);
+    return res.status(500).json({
+      message: "Error retrieving username",
+      error: error.message
+    });
+  }
+}; 

@@ -15,6 +15,7 @@ function DrawingCanvasMultiPlayer({
 }) {
   const [searchParams] = useSearchParams();
   const code = searchParams.get("session");
+   const model = searchParams.get("model") || "lstm";
   const wsRef = useWebSocket();
 
   // --- Identity & Match State ---
@@ -41,7 +42,7 @@ function DrawingCanvasMultiPlayer({
   const lastPos = useRef({ x: 0, y: 0 });
   const [drawingData, setDrawingData] = useState([]);
 
-  const effectiveKeywords = route === "predict_cnn" 
+  const effectiveKeywords = model === "cnn" 
     ? ["Apple", "House", "Cat", "Tree", "Bicycle", "Dog"] 
     : keywords;
 

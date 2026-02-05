@@ -55,7 +55,14 @@ export const MultiplayerMenu = () => {
   const onlinePlay = () => {
     console.log("Sending ONLINE PLAY message via WebSocket");
     //wsRef.current?.send(JSON.stringify({type:"CREATE_GAME_ONLINE",id:"id1"}));
-  }  
+    sendUsername();
+  } 
+  
+  const sendUsername = () => {
+    const username = localStorage.getItem("username") || "UnknownUser";
+    console.log("Sending USERNAME message via WebSocket:", username);
+    wsRef.current?.send(JSON.stringify({type:"SET_USERNAME",username:username}));
+  }
 
 
   const [mode, setMode] = useState(null); 

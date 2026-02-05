@@ -5,36 +5,21 @@ const getSecretHash = require("../utils/secretHash.js")
 const { v4: uuidv4 } = require('uuid')
 const {insertUser} = require("../models/dynamodb.js")
 
-
 const cognitoIdentityServiceProvider = new AWS.CognitoIdentityServiceProvider({
   region: ENV.AWS_REGION 
 });
 
-
-//SignUp
+//SignUp - Cognito d'abord, puis DynamoDB
 async function signUpUser(email, password, username) {
   const internalUsername = uuidv4();
-
-  // Step 1: Insert user into DB
-  let insert = false;
-  try {
-    insert = await insertUser({ id: internalUsername, email, username });
-  } catch (err) {
-    throw new Error("DB insert failed: " + err.message);
-  }
-
-  // Stop execution if insert failed
-  if (!insert) {
-    throw new Error("DB insert returned false. Cognito signup aborted.");
-  }
-
-  // Step 2: Prepare Cognito signup
+  
+  // Step 1: Prepare Cognito signup
   const params = {
     ClientId: ENV.COGNITO_CLIENT_ID,
-    Username: internalUsername,
+    Username: username,
     Password: password,
     SecretHash: getSecretHash(
-      internalUsername,
+      username,
       ENV.COGNITO_CLIENT_ID,
       ENV.COGNITO_CLIENT_SECRET
     ),
@@ -44,17 +29,40 @@ async function signUpUser(email, password, username) {
     ],
   };
 
-  // Step 3: Call Cognito
-  return new Promise((resolve, reject) => {
-    cognitoIdentityServiceProvider.signUp(params, (err, data) => {
-      if (err) return reject(err);
-      resolve({
-        userSub: data.UserSub,
-        email,
-        message: "User created successfully. Please check email for verification code.",
+  try {
+    // Step 2: Call Cognito FIRST
+    const cognitoData = await new Promise((resolve, reject) => {
+      cognitoIdentityServiceProvider.signUp(params, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
       });
     });
-  });
+
+    // Step 3: THEN insert into DynamoDB
+    let insert = false;
+    try {
+      insert = await insertUser({ 
+        id: internalUsername, 
+        email, 
+        username,
+        cognitoSub: cognitoData.UserSub, // Store Cognito ID for reference
+        createdAt: new Date().toISOString()
+      });
+    } catch (dbErr) {
+      // Log DB error but don't fail the whole signup
+      console.error("DB insert failed after Cognito success:", dbErr.message);
+      // You might want to implement a retry mechanism or queue here
+    }
+
+    return {
+      userSub: cognitoData.UserSub,
+      email,
+      message: "User created successfully. Please check email for verification code.",
+      dbInserted: insert // Indicate if DB insertion was successful
+    };
+  } catch (cognitoErr) {
+    throw new Error("Cognito signup failed: " + cognitoErr.message);
+  }
 }
 
 // SIGNIN - Only email and password required
@@ -84,13 +92,13 @@ function signInUser(email, password) {
 }
 
 //Confirmation code 
-function confirmSignUp(email, code) {
+function confirmSignUp(username, code) {
   return new Promise((resolve, reject) => {
     const params = {
       ClientId: ENV.COGNITO_CLIENT_ID,
-      Username: email, 
+      Username: username, 
       ConfirmationCode: code,
-      SecretHash: getSecretHash(email, ENV.COGNITO_CLIENT_ID, ENV.COGNITO_CLIENT_SECRET)
+      SecretHash: getSecretHash(username, ENV.COGNITO_CLIENT_ID, ENV.COGNITO_CLIENT_SECRET)
     };
 
     cognitoIdentityServiceProvider.confirmSignUp(params, (err, data) => {
@@ -101,12 +109,12 @@ function confirmSignUp(email, code) {
 }
 
 // RESEND CONFIRMATION CODE
-function resendConfirmationCode(email) {
+function resendConfirmationCode(username) {
   return new Promise((resolve, reject) => {
     const params = {
       ClientId: ENV.COGNITO_CLIENT_ID,
-      Username: email,
-      SecretHash: getSecretHash(email, ENV.COGNITO_CLIENT_ID, ENV.COGNITO_CLIENT_SECRET)
+      Username: usename,
+      SecretHash: getSecretHash(username, ENV.COGNITO_CLIENT_ID, ENV.COGNITO_CLIENT_SECRET)
     };
 
     cognitoIdentityServiceProvider.resendConfirmationCode(params, (err, data) => {
@@ -116,4 +124,4 @@ function resendConfirmationCode(email) {
   });
 }
 
-module.exports = { signInUser, signUpUser ,confirmSignUp,resendConfirmationCode};
+module.exports = { signInUser, signUpUser, confirmSignUp, resendConfirmationCode };

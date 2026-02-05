@@ -11,6 +11,7 @@ router.post("/confirmEmail",signupController.signupConfirm);
 //signin se connecter
 router.post("/signin",signupController.signin);
 
+router.post("/getUserNameByEmail",signupController.userNameByEmail);
 
 
 module.exports = router;

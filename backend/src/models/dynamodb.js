@@ -1,8 +1,37 @@
-//This flie will define AWS dynamodb object and dynamo db operations like READ,WRITE...
 const AWS = require("aws-sdk");
+const ENV = require("../config/env.js");
+
+console.log("🔍 Checking AWS Credentials:");
+console.log("  AWS_ACCESS_KEY_ID:", ENV.AWS_ACCESS_KEY_ID ? `✅ ${ENV.AWS_ACCESS_KEY_ID.substring(0, 10)}...` : "❌ MISSING");
+console.log("  AWS_SECRET_ACCESS_KEY:", ENV.AWS_SECRET_ACCESS_KEY ? `✅ ${ENV.AWS_SECRET_ACCESS_KEY.substring(0, 10)}...` : "❌ MISSING");
+console.log("  AWS_SESSION_TOKEN:", ENV.AWS_SESSION_TOKEN ? `✅ ${ENV.AWS_SESSION_TOKEN.substring(0, 20)}...` : "❌ MISSING");
+console.log("  AWS_REGION:", ENV.AWS_REGION || "❌ MISSING");
+
+AWS.config.update({
+  region: ENV.AWS_REGION,
+  accessKeyId: ENV.AWS_ACCESS_KEY_ID,
+  secretAccessKey: ENV.AWS_SECRET_ACCESS_KEY,
+  sessionToken: ENV.AWS_SESSION_TOKEN
+});
+
 const dynamo = new AWS.DynamoDB.DocumentClient();
 
-//Creating a user in dynamo db
+// 🧪 TEST : Essayer de scanner la table users
+(async () => {
+  try {
+    console.log("🧪 Testing DynamoDB connection with table 'users'...");
+    const result = await dynamo.scan({
+      TableName: "users",
+      Limit: 1  // Juste pour tester la connexion
+    }).promise();
+    console.log("✅ DynamoDB connection successful!");
+    console.log("📋 Found", result.Count, "items in table 'users'");
+  } catch (err) {
+    console.error("❌ DynamoDB connection failed:", err.code, "-", err.message);
+  }
+})();
+
+
 async function insertUser(user) {
   const params = {
     TableName: "users",
@@ -13,7 +42,6 @@ async function insertUser(user) {
       role: user.role || "user",
       created_at: new Date().toISOString(),
       profile_pic : user.username[0]
-      //we get just the first letter,pictures will be stored in an S3 bucket with id=firstletter.
     }
   };
 
@@ -33,21 +61,46 @@ async function getUserIdByEmail(email) {
     ExpressionAttributeValues: {
       ":email": email
     },
-    ProjectionExpression: "id" // Only return needed fields
+    ProjectionExpression: "id"
   };
 
   try {
     const result = await dynamo.scan(params).promise();
     
     if (result.Items && result.Items.length > 0) {
-      return result.Items[0]; // Return first matching user
+      return result.Items[0];
     }
     
-    return null; // User not found
+    return null;
   } catch (err) {
     console.error("Error getting user by email:", err);
     throw err;
   }
 }
 
-module.exports={insertUser,getUserIdByEmail}
+async function getUserNameByEmail(email) {
+  const params = {
+    TableName: "users",
+    FilterExpression: "email = :email",
+    ExpressionAttributeValues: {
+      ":email": email
+    },
+    ProjectionExpression: "username"
+  };
+  try {
+    const result = await dynamo.scan(params).promise();
+    if (result.Items && result.Items.length > 0) {
+      return result.Items[0].username;
+    } 
+    return null;
+  } catch (err) {
+    console.error("Error getting username by email:", err);
+    throw err;
+  }
+}
+
+
+
+
+
+module.exports = { insertUser, getUserIdByEmail , getUserNameByEmail};
