@@ -23,8 +23,8 @@ except Exception as e:
 
 def vector_to_image(
     strokes: np.ndarray,
-    image_size: int = 255,
-    stroke_width: int = 3,
+    image_size: int = 254,
+    stroke_width: int = 2,
     save_path: str = "drawing.png",
 ) -> Image.Image:
     """

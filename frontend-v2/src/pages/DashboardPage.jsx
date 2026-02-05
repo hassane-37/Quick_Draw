@@ -7,6 +7,14 @@ import "./DashboardPage.css";
 
 function DashboardPage() {
     const [showModeCards, setShowModeCards] = useState(false);
+    const [multiplayer, setMultiplayer] = useState(false);
+
+    function handleModeSelect(isMultiplayer) {
+      setMultiplayer(isMultiplayer);
+      setShowModeCards(true);
+      console.log(isMultiplayer);
+    }
+
   return (
     <>
       <Header id={1} bgColor="#ffd139" />
@@ -38,14 +46,14 @@ function DashboardPage() {
           <div className="btn-container">
             <button
             className="btn primary"
-            onClick={() => setShowModeCards(true)}
+            onClick={() => handleModeSelect(false)}
             >
             <FaGamepad /> Classic
             </button>
 
             <button
             className="btn secondary"
-            onClick={() => setShowModeCards(true)}
+            onClick={() => handleModeSelect(true)}
             >
             <FaUsers /> Multiplayer
             </button>
@@ -61,7 +69,7 @@ function DashboardPage() {
               className="modal"
               onClick={(e) => e.stopPropagation()}
             >
-              <MultiCards />
+              <MultiCards multiplayer={multiplayer} />
             </div>
           </div>
         )}

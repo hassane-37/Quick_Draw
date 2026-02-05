@@ -12,13 +12,20 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const MultiCards = () => {
+const MultiCards = ({multiplayer}) => {
   const [showModelChoice, setShowModelChoice] = useState(false);
   const navigate = useNavigate();
 
   const goToGame = (model) => {
-    const route = "/game-" + model;
-    navigate(route, { state: { model } });
+    if (!multiplayer) {
+      const route = "/game-" + model;
+      navigate(route, { state: { model } });
+      return;
+    }
+    else {
+      const route = "/multiplayer?model=" + model;
+      navigate(route, { state: { model } });
+    }
   };
 
   return (

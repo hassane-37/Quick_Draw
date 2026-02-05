@@ -3,7 +3,7 @@ import "./Canvas.css";
 import StatPage from "../../pages/StatePage";
 
 const LABELS = ["Bicycle", "Eiffel Tower", "Pizza", "Cat", "Cloud", "Apple", "Tree", "Car", "Sun", "House"];
-const CNN_LABELS = ["Car","Bycicle","Dog","Bird","Hammer","Cat","Apple","House","Tree"];
+const CNN_LABELS = ["Apple","Bycicle","Dog","Bird","Hammer","Cat","Car","House","Tree"];
 
 export default function DrawingCanvas({ 
   roundsCount = 6, 
