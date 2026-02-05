@@ -9,3 +9,4 @@ ml-model/
 frontend/
 screenshots/
 backend/src/.env
+.env
