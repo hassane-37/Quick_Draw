@@ -21,38 +21,96 @@
 
 <hr/>
 
+<h2>Project Overview</h2>
+
+<p>
+This project is a full-stack implementation inspired by Google’s <b>Quick, Draw!</b>:
+</p>
+
+<ul>
+  <li>
+    <b>Frontend (React)</b>: a web interface where the user draws sketches on a
+    canvas (single-player and multi-player modes). The frontend manages the
+    drawing experience, authentication flow, and game screens.
+  </li>
+  <li>
+    <b>Backend (Node.js / Express)</b>: exposes REST APIs and WebSocket endpoints
+    for authentication (AWS Cognito), user/session management, and
+    multi-player game logic.
+  </li>
+  <li>
+    <b>ML Server (FastAPI + TensorFlow)</b>: receives vectorized drawing data
+    (sequence of strokes), runs inference using an LSTM and a CNN, and returns
+    the predicted class + confidence.
+  </li>
+</ul>
+
+<p>
+The typical user flow is:
+</p>
+
+<ol>
+  <li>The user signs up / signs in (Cognito via the Node.js backend).</li>
+  <li>The user draws on the canvas; the strokes are encoded as vectors.</li>
+  <li>The backend or frontend sends these vectors to the FastAPI ML server.</li>
+  <li>The ML server predicts the class (e.g. cat, house, tree…) and returns a confidence score.</li>
+  <li>The result is displayed in real time in the UI.</li>
+</ol>
+
+<hr/>
+
+<h2>Architecture</h2>
+
+<h3>Frontend (React, Vite)</h3>
+
+<ul>
+  <li>Located in the <code>frontend-v2</code> folder.</li>
+  <li>Built with React + Vite, using modern hooks and components.</li>
+  <li>Implements drawing canvases (single and multi-player), authentication pages,
+      dashboard, and waiting / state screens.</li>
+  <li>Communicates with the Node.js backend via HTTP and WebSocket (Socket.IO).</li>
+</ul>
+
+<h3>Backend (Node.js / Express + AWS)</h3>
+
+<ul>
+  <li>Located in the <code>backend</code> folder.</li>
+  <li>Provides REST APIs for authentication (AWS Cognito), health checks, and
+      prediction routing.</li>
+  <li>Uses AWS Cognito for user auth and DynamoDB for persistence.</li>
+  <li>Includes a Socket.IO server to manage real-time multi-player game sessions.</li>
+</ul>
+
+<h3>Machine Learning Server (FastAPI)</h3>
+
+<ul>
+  <li>Located in the <code>ml-server</code> folder.</li>
+  <li>Built with FastAPI and TensorFlow/Keras.</li>
+  <li>Loads two models:
+    <ul>
+      <li><b>LSTM model</b> (<code>lstm_drawing_classifier.h5</code>) for sequence data.</li>
+      <li><b>CNN model</b> (<code>doodle_classifier_model.h5</code>) for image data.</li>
+    </ul>
+  </li>
+  <li>Exposes two main endpoints:
+    <ul>
+      <li><code>POST /predict</code>: takes stroke vectors and runs the LSTM model.</li>
+      <li><code>POST /predict_cnn</code>: converts vectors to an image and runs the CNN.</li>
+    </ul>
+  </li>
+</ul>
+
+<hr/>
+
 <h2>How to run</h2>
 
 <h3>Backend</h3>
 
 <p>
-Log in to the AWS Lab using my credentials:
+Configure your AWS credentials (Cognito &amp; DynamoDB) via environment variables
+in the <code>.env</code> file. Use the values provided by your instructor / team
+and <b>do not commit them</b> to version control.
 </p>
-
-<ul>
-  <li><b>Email:</b> <i>saad.rouyass@telecom-st-etienne.fr</i></li>
-  <li><b>Password:</b> <i>(check Whatsapp group)</i></li>
-</ul>
-
-<p>
-From the AWS Lab page, click on <b>AWS Details</b> and copy the following values:
-</p>
-
-<ul>
-  <li><code>AWS_ACCESS_KEY_ID</code></li>
-  <li><code>AWS_SECRET_ACCESS_KEY</code></li>
-  <li><code>AWS_SESSION_TOKEN</code></li>
-</ul>
-
-<p>
-Paste these values into the first three lines of the <code>.env</code> file:
-</p>
-
-<pre>
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_SESSION_TOKEN=...
-</pre>
 
 <p>Start the backend server:</p>
 
@@ -75,12 +133,10 @@ npm install
 npm run dev
 </pre>
 
-<p>NOTE!!!: WHEN YOU RUN THE FRONTEND ,IN THE SIGNIN PAGE ENTER : </p>
-
-<pre>
-saadrouisse01@gmail.com
-123Saad@123
-</pre>
+<p>
+Use the test credentials provided separately by the team or instructor
+to sign in on the login page.
+</p>
 
 <hr/>
 
