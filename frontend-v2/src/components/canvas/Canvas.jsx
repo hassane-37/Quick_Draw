@@ -58,6 +58,29 @@ export default function DrawingCanvas({
     }
   };
 
+  const clearCanvas = () => {
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setDrawingData([]); 
+    setPrediction("");
+    setConfidence(0);
+  };
+
+  const nextRound = () => {
+    
+    setTransition(true);
+    setTimeout(() => {
+      clearCanvas();
+      setTimeLeft(20);
+      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
+      setTransition(false);
+    }, 500);
+    setGamePrediction(prev => [...prev, {word: keywords[round], prediction, confidence}]);
+    console.log("Game Predictions so far:", gamePrediction);
+    if (round + 1 === roundsCount) {
+        setGameOver(true);
+    }
+  };
+
  
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,8 +104,10 @@ export default function DrawingCanvas({
 
   useEffect(() => {
     if (timeLeft === 0) {
-      nextRound();
-      return;
+      const timeoutId = setTimeout(() => {
+        nextRound();
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);
@@ -151,28 +176,6 @@ export default function DrawingCanvas({
   };
 
 
-  const clearCanvas = () => {
-    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    setDrawingData([]); 
-    setPrediction("");
-    setConfidence(0);
-  };
-
-  const nextRound = () => {
-    
-    setTransition(true);
-    setTimeout(() => {
-      clearCanvas();
-      setTimeLeft(20);
-      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
-      setTransition(false);
-    }, 500);
-    setGamePrediction(prev => [...prev, {word: keywords[round], prediction, confidence}]);
-    console.log("Game Predictions so far:", gamePrediction);
-    if (round + 1 === roundsCount) {
-        setGameOver(true);
-    }
-  };
   if (gameOver) {
   return <StatPage stats={gamePrediction} />;
   }
