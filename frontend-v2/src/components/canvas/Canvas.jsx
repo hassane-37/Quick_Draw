@@ -115,11 +115,45 @@ export default function DrawingCanvas({
     return () => window.removeEventListener("resize", resize);
   }, []);
 
+  const clearCanvas = () => {
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setDrawingData([]); 
+    setPrediction("");
+    setConfidence(0);
+  };
+
+  const nextRound = () => {
+    // Créer l'objet de prédiction pour ce round
+    const newPrediction = { 
+      word: keywords[round], 
+      prediction, 
+      confidence 
+    };
+    setTransition(true);
+    setTimeout(() => {
+      clearCanvas();
+      setTimeLeft(20);
+      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
+      setTransition(false);
+    }, 500);
+    setGamePrediction(prev => {
+      const updated = [...prev, newPrediction];
+      console.log("Game Predictions so far:", updated);
+      if (round + 1 === roundsCount) {
+        setGameOver(true);
+        saveGameToBackend(updated);
+      }
+      return updated;
+    });
+  };
 
   useEffect(() => {
     if (timeLeft === 0) {
-      nextRound();
-      return;
+      // Utilise un setTimeout pour éviter le setState direct
+      const timeout = setTimeout(() => {
+        nextRound();
+      }, 0);
+      return () => clearTimeout(timeout);
     }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);
@@ -181,45 +215,9 @@ export default function DrawingCanvas({
     });
   };
 
-  const clearCanvas = () => {
-    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    setDrawingData([]); 
-    setPrediction("");
-    setConfidence(0);
-  };
-
-  const nextRound = () => {
-    // Créer l'objet de prédiction pour ce round
-    const newPrediction = { 
-      word: keywords[round], 
-      prediction, 
-      confidence 
-    };
-    const updatedPredictions = [...gamePrediction, newPrediction];
-    
-    setTransition(true);
-    setTimeout(() => {
-      clearCanvas();
-      setTimeLeft(20);
-      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
-      setTransition(false);
-    }, 500);
-    
-    setGamePrediction(updatedPredictions);
-    console.log("📝 Round", round + 1, "completed:", newPrediction);
-
-    // Si c'est le dernier round, sauvegarder la partie
-    if (round + 1 === roundsCount) {
-      console.log("🎮 Game finished! Saving to database...");
-      saveGameToBackend(updatedPredictions);
-      setGameOver(true);
-    }
-  };
-
   if (gameOver) {
-    return <StatPage stats={gamePrediction} />;
+  return <StatPage stats={gamePrediction} />;
   }
-
   return (
     <div className={`fullscreen-app ${transition ? "fade-out" : ""}`}>
       <canvas
@@ -248,6 +246,7 @@ export default function DrawingCanvas({
         </div>
       </div>
 
+      {/* I SEE... FLOATING UI */}
       {prediction && (
         <div className="prediction-bubble">
           <p>I see <strong>{prediction}</strong></p>
