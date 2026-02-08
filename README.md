@@ -52,7 +52,7 @@ The typical user flow is:
 <ol>
   <li>The user signs up / signs in (Cognito via the Node.js backend).</li>
   <li>The user draws on the canvas; the strokes are encoded as vectors.</li>
-  <li>The backend or frontend sends these vectors to the FastAPI ML server.</li>
+  <li>The frontend sends these vectors to the FastAPI ML server.</li>
   <li>The ML server predicts the class (e.g. cat, house, tree…) and returns a confidence score.</li>
   <li>The result is displayed in real time in the UI.</li>
 </ol>
