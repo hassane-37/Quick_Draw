@@ -1,74 +1,37 @@
 import { useEffect, useRef, useState } from "react";
 import "./Canvas.css";
 import StatPage from "../../pages/StatePage";
-import { jwtDecode } from "jwt-decode";
 
 const LABELS = ["Bicycle", "Eiffel Tower", "Pizza", "Cat", "Cloud", "Apple", "Tree", "Car", "Sun", "House"];
-const CNN_LABELS = ["Car","Bycicle","Dog","Bird","Hammer","Cat","Apple","House","Tree"];
+const CNN_LABELS = ["Apple","Bycicle","Dog","Bird","Hammer","Cat","Car","House","Tree"];
 
 export default function DrawingCanvas({ 
   roundsCount = 6, 
   keywords = ["Tree", "Pizza", "Car", "House", "Cloud","Sun"],
-  route = "predict"
+   route = "predict"
 }) {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
+  
+
   const lastPos = useRef({ x: 0, y: 0 });
+  
 
   const [drawingData, setDrawingData] = useState([]);
+  
   const [round, setRound] = useState(0);
   const [timeLeft, setTimeLeft] = useState(20);
   const [isDrawing, setIsDrawing] = useState(false);
   const [transition, setTransition] = useState(false);
   const [prediction, setPrediction] = useState("");
   const [confidence, setConfidence] = useState(0);
+
   const [gamePrediction, setGamePrediction] = useState([]);
   const [gameOver, setGameOver] = useState(false);
 
-  if (route === 'predict_cnn') {
+  if (route=='predict_cnn') {
     keywords = ['Apple','House','Cat','Tree','Bycicle','Dog'];
   }
-
-  /* ------------------ SAUVEGARDE EN BASE ------------------ */
-  const saveGameToBackend = async (predictions) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.log("No token found, skipping save");
-        return;
-      }
-
-      const decoded = jwtDecode(token);
-      const user_id = decoded.sub || decoded.username || decoded["cognito:username"];
-
-      console.log("💾 Saving game for user:", user_id);
-      console.log("📊 Predictions:", predictions);
-
-      const response = await fetch("http://localhost:4000/api/games/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          user_id,
-          model_type: route === "predict_cnn" ? "cnn" : "lstm",
-          rounds: predictions
-        })
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        console.log("✅ Game saved successfully:", data);
-      } else {
-        console.error("❌ Failed to save game:", data);
-      }
-    } catch (err) {
-      console.error("❌ Error saving game:", err);
-    }
-  };
-
   /* ------------------ API Function ------------------ */
   const sendToML = async (dataToSend) => {
     if (dataToSend.length < 5) return;
@@ -95,6 +58,29 @@ export default function DrawingCanvas({
     }
   };
 
+  const clearCanvas = () => {
+    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    setDrawingData([]); 
+    setPrediction("");
+    setConfidence(0);
+  };
+
+  const nextRound = () => {
+    
+    setTransition(true);
+    setTimeout(() => {
+      clearCanvas();
+      setTimeLeft(20);
+      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
+      setTransition(false);
+    }, 500);
+    setGamePrediction(prev => [...prev, {word: keywords[round], prediction, confidence}]);
+    console.log("Game Predictions so far:", gamePrediction);
+    if (round + 1 === roundsCount) {
+        setGameOver(true);
+    }
+  };
+
  
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -115,45 +101,13 @@ export default function DrawingCanvas({
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  const clearCanvas = () => {
-    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    setDrawingData([]); 
-    setPrediction("");
-    setConfidence(0);
-  };
-
-  const nextRound = () => {
-    // Créer l'objet de prédiction pour ce round
-    const newPrediction = { 
-      word: keywords[round], 
-      prediction, 
-      confidence 
-    };
-    setTransition(true);
-    setTimeout(() => {
-      clearCanvas();
-      setTimeLeft(20);
-      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
-      setTransition(false);
-    }, 500);
-    setGamePrediction(prev => {
-      const updated = [...prev, newPrediction];
-      console.log("Game Predictions so far:", updated);
-      if (round + 1 === roundsCount) {
-        setGameOver(true);
-        saveGameToBackend(updated);
-      }
-      return updated;
-    });
-  };
 
   useEffect(() => {
     if (timeLeft === 0) {
-      // Utilise un setTimeout pour éviter le setState direct
-      const timeout = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         nextRound();
       }, 0);
-      return () => clearTimeout(timeout);
+      return () => clearTimeout(timeoutId);
     }
     const timer = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
     return () => clearTimeout(timer);

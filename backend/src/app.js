@@ -11,29 +11,16 @@ const apiLimiter = require("./middlewares/rateLimiter");
 
 const app = express();
 
-// Sécurité de base
 app.use(helmet());
-app.disable("x-powered-by"); // ne pas révéler qu'on utilise Express
+app.disable("x-powered-by");
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.json({ limit: "5mb" }));
 
-// CORS (à restreindre plus tard à ton domaine frontend)
-app.use(cors()); 
-
-// Logs HTTP
-app.use(morgan("dev")); //utile pour debugger
-
-// Pour lire le JSON (limité pour éviter les gros payloads malveillants)
-app.use(express.json({ limit: "5mb" })); 
-
-// Rate limiting global
 app.use("/api", apiLimiter);
-
-// Toutes les routes API
 app.use("/api", routes);
 
-// 404
 app.use(notFound);
-
-// Gestion centralisée des erreurs
 app.use(errorHandler);
 
 module.exports = app;

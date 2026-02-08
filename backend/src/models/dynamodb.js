@@ -1,12 +1,17 @@
-//This file will define AWS dynamodb object and dynamo db operations like READ,WRITE...
 const AWS = require("aws-sdk");
+const ENV = require("../config/env.js");
 
-// Configurer AWS avec les credentials depuis les variables d'environnement
+console.log(" Checking AWS Credentials:");
+console.log("  AWS_ACCESS_KEY_ID:", ENV.AWS_ACCESS_KEY_ID ? ` ${ENV.AWS_ACCESS_KEY_ID.substring(0, 10)}...` : "❌ MISSING");
+console.log("  AWS_SECRET_ACCESS_KEY:", ENV.AWS_SECRET_ACCESS_KEY ? ` ${ENV.AWS_SECRET_ACCESS_KEY.substring(0, 10)}...` : "❌ MISSING");
+console.log("  AWS_SESSION_TOKEN:", ENV.AWS_SESSION_TOKEN ? `${ENV.AWS_SESSION_TOKEN.substring(0, 20)}...` : "❌ MISSING");
+console.log("  AWS_REGION:", ENV.AWS_REGION || " MISSING");
+
 AWS.config.update({
-  region: process.env.AWS_REGION || "us-east-1",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  sessionToken: process.env.AWS_SESSION_TOKEN
+  region: ENV.AWS_REGION,
+  accessKeyId: ENV.AWS_ACCESS_KEY_ID,
+  secretAccessKey: ENV.AWS_SECRET_ACCESS_KEY,
+  sessionToken: ENV.AWS_SESSION_TOKEN
 });
 
 const dynamo = new AWS.DynamoDB.DocumentClient();
@@ -19,10 +24,10 @@ const dynamo = new AWS.DynamoDB.DocumentClient();
       TableName: "users",
       Limit: 1  // Juste pour tester la connexion
     }).promise();
-    console.log("✅ DynamoDB connection successful!");
-    console.log("📋 Found", result.Count, "items in table 'users'");
+    console.log(" DynamoDB connection successful!");
+    console.log("Found", result.Count, "items in table 'users'");
   } catch (err) {
-    console.error("❌ DynamoDB connection failed:", err.code, "-", err.message);
+    console.error(" DynamoDB connection failed:", err.code, "-", err.message);
   }
 })();
 
@@ -56,8 +61,7 @@ async function getUserIdByEmail(email) {
     ExpressionAttributeValues: {
       ":email": email
     },
-    // Retourner plus d'infos pour le frontend
-    ProjectionExpression: "id, email, username, role, profile_pic"
+    ProjectionExpression: "id"
   };
 
   try {
@@ -74,105 +78,29 @@ async function getUserIdByEmail(email) {
   }
 }
 
-// ==================== GAMES TABLE OPERATIONS ====================
-
-// Créer une nouvelle partie
-async function insertGame(game) {
-  const params = {
-    TableName: "games",
-    Item: {
-      id: game.id,
-      user_id: game.user_id,
-      mode: game.mode || "classic",
-      model_type: game.model_type, // "cnn" ou "lstm"
-      rounds: game.rounds, // Array des résultats par round
-      total_score: game.total_score,
-      correct_count: game.correct_count,
-      total_rounds: game.total_rounds,
-      created_at: new Date().toISOString()
-    }
-  };
-
-  try {
-    await dynamo.put(params).promise();
-    return true;
-  } catch (err) {
-    console.error("Error creating game:", err);
-    return false;
-  }
-}
-
-// Récupérer les parties d'un utilisateur
-async function getGamesByUserId(user_id) {
-  const params = {
-    TableName: "games",
-    IndexName: "user_id-index", // Créer un GSI sur user_id
-    KeyConditionExpression: "user_id = :uid",
-    ExpressionAttributeValues: {
-      ":uid": user_id
-    },
-    ScanIndexForward: false // Plus récent en premier
-  };
-
-  try {
-    const result = await dynamo.query(params).promise();
-    return result.Items || [];
-  } catch (err) {
-    // Fallback avec scan si pas de GSI
-    const scanParams = {
-      TableName: "games",
-      FilterExpression: "user_id = :uid",
-      ExpressionAttributeValues: {
-        ":uid": user_id
-      }
-    };
-    const result = await dynamo.scan(scanParams).promise();
-    return result.Items || [];
-  }
-}
-
-// Récupérer les statistiques d'un utilisateur
-async function getUserStats(user_id) {
-  const games = await getGamesByUserId(user_id);
-  
-  if (games.length === 0) {
-    return {
-      games_played: 0,
-      wins: 0,
-      top_score: 0,
-      recent_games: []
-    };
-  }
-
-  const wins = games.filter(g => g.correct_count >= Math.ceil(g.total_rounds / 2)).length;
-  const topScore = Math.max(...games.map(g => g.total_score || 0));
-  const recentGames = games
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    .slice(0, 5);
-
-  return {
-    games_played: games.length,
-    wins,
-    top_score: topScore,
-    recent_games: recentGames
-  };
-}
-
-async function getUserById(userId) {
+async function getUserNameByEmail(email) {
   const params = {
     TableName: "users",
-    Key: {
-      id: userId
-    }
+    FilterExpression: "email = :email",
+    ExpressionAttributeValues: {
+      ":email": email
+    },
+    ProjectionExpression: "username"
   };
-  
   try {
-    const result = await dynamo.get(params).promise();
-    return result.Item;
+    const result = await dynamo.scan(params).promise();
+    if (result.Items && result.Items.length > 0) {
+      return result.Items[0].username;
+    } 
+    return null;
   } catch (err) {
-    console.error("Error getting user by id:", err);
+    console.error("Error getting username by email:", err);
     throw err;
   }
 }
 
-module.exports = { insertUser, getUserIdByEmail, insertGame, getGamesByUserId, getUserStats };
+
+
+
+
+module.exports = { insertUser, getUserIdByEmail , getUserNameByEmail};

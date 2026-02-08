@@ -4,7 +4,10 @@ import { SignInPage } from './pages/SignInPage';
 import DashboardPage from './pages/DashboardPage';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import CanvasPage from './pages/CanvasPage';
-import ProtectedRoute from '../ProtectedRoute';
+import ProtectedRoute from './ProtectedRoute';
+import { MultiplayerPage } from './pages/MultiplayerPage';
+import DrawingCanvasMultiPlayer from './components/canvas/CanvasMultiPlyr';
+
 function App() {
   
   return (
@@ -40,6 +43,23 @@ function App() {
         }
        />
 
+        <Route
+        path="/multiplayer"
+        element={
+          <ProtectedRoute>
+            <MultiplayerPage />
+          </ProtectedRoute>
+        }
+       />
+
+      <Route
+        path="/game-multiplayer"
+        element={
+          <ProtectedRoute>
+            <DrawingCanvasMultiPlayer roundsCount={6} keywords={["Tree", "Pizza", "Car", "House", "Cloud","Sun"] } route={"predict_cnn"} />
+          </ProtectedRoute>
+        }
+       />
             </Routes>
           </BrowserRouter>
       

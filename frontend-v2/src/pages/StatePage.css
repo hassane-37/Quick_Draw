@@ -150,3 +150,23 @@
   background: #ffd139;
   color: #1a1a1a;
 }
+
+.multiplayer .players-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.winner-banner {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffd700, #ffae00);
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.player-name {
+  text-align: center;
+  font-size: 1.6rem;
+}

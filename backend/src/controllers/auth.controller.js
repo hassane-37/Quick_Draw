@@ -1,7 +1,7 @@
 const {signInUser,signUpUser,confirmSignUp} = require("../models/awsCognito")
 //for AWS dynamoDB
 const {getUserIdByEmail} = require("../models/dynamodb")
-
+const { getUserNameByEmail } = require("../models/dynamodb");
 
 
 exports.signup = async (req, res) => {
@@ -57,19 +57,11 @@ exports.signin =  async (req, res) => {
       });
     }
 
-    // Vérifier via Cognito
-    const cognitoTokens = await signInUser(email, password);
-
-    // Récupérer les infos utilisateur depuis DynamoDB
-    let userInfo = null;
-    try {
-      userInfo = await getUserIdByEmail(email);
-    } catch (_) {}
-
+    //calling AWS cognito signingup service 
+    const user = await signInUser(email, password);
     return res.status(200).json({
       message: "User signed in successfully",
-      data: cognitoTokens,
-      user: userInfo ? { id: userInfo.id, email: userInfo.email, username: userInfo.username } : { email }
+      data : user
     });
 
   } catch (error) {
@@ -144,33 +136,29 @@ exports.signupConfirm = async (req, res) => {
   }
 };
 
-exports.getUserStats = async (req, res) => {
+exports.userNameByEmail = async (req, res) => {
   try {
-    const { user_id } = req.params;
-    
-    // Vérifier que l'utilisateur demande ses propres stats
-    const token = req.headers.authorization?.replace('Bearer ', '');
-    const decoded = jwtDecode(token);
-    
-    // Option 1: Si vous stockez sub dans DynamoDB
-    // Option 2: Si vous utilisez email comme lien
-    const userFromToken = await getUserIdByEmail(decoded.email);
-    
-    if (userFromToken.id !== user_id) {
-      return res.status(403).json({
-        message: "Unauthorized to view these stats"
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        message: "Missing required field: email"
       });
     }
-    
-    const stats = await getUserStats(user_id);
+    const username = await getUserNameByEmail(email);
+    if (!username) {
+      return res.status(404).json({ 
+        message: "User not found"
+      });
+    }
     return res.status(200).json({
-      data: stats
+      message: "Username retrieved successfully",
+      username: username
     });
-    
   } catch (error) {
-    console.error("Error getting user stats:", error);
+    console.error("Error retrieving username:", error);
     return res.status(500).json({
-      message: "Error retrieving user stats"
+      message: "Error retrieving username",
+      error: error.message
     });
   }
-};
+}; 

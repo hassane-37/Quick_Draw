@@ -1,74 +1,40 @@
 import { FaGamepad, FaUsers, FaTrophy } from "react-icons/fa";
 import Header from "../components/Header/Header";
 import { Card } from "../components/Card/Card";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MultiCards from "../components/MultipleCards";
 import "./DashboardPage.css";
-import { jwtDecode } from "jwt-decode";
 
-// import { useAuth } from "../components/hooks/useAuth";
+import { useAuth } from "../components/hooks/useAuth";
 
 
  
 
 function DashboardPage() {
-  const [showModeCards, setShowModeCards] = useState(false);
-  const [stats, setStats] = useState({
-    games_played: 0,
-    wins: 0,
-    top_score: 0,
-    recent_games: []
-  });
-  const [username, setUsername] = useState("User");
-  const [loading, setLoading] = useState(true);
+    const { user, loading } = useAuth();
+    const [showModeCards, setShowModeCards] = useState(false);
+    const [multiplayer, setMultiplayer] = useState(false);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setLoading(false);
-          return;
-        }
+    function handleModeSelect(isMultiplayer) {
+      setMultiplayer(isMultiplayer);
+      setShowModeCards(true);
+      console.log(isMultiplayer);
+    }
+    
+    if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        backgroundColor: '#ffd139'
+      }}>
+        <h2>Loading dashboard...</h2>
+      </div>
+    );
+  }
 
-        const decoded = jwtDecode(token);
-        // Cognito utilise 'sub' pour l'ID unique, mais on peut aussi avoir 'username'
-        const user_id = decoded.sub || decoded.username || decoded["cognito:username"];
-        setUsername(decoded.name || decoded["name"] || "User");
-
-        console.log("Fetching stats for user_id:", user_id);
-
-        const response = await fetch(
-          `http://localhost:4000/api/games/stats/${user_id}`,
-          {
-            headers: {
-              "Authorization": `Bearer ${token}`
-            }
-          }
-        );
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log("Stats received:", result.data);
-          setStats(result.data);
-        } else {
-          console.error("Failed to fetch stats:", response.status);
-        }
-      } catch (err) {
-        console.error("Error fetching stats:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  // Formater l'activité récente
-  const formatActivity = (game) => {
-    const won = game.correct_count >= Math.ceil(game.total_rounds / 2);
-    return `${won ? "Won" : "Lost"} a ${game.model_type?.toUpperCase() || "Classic"} game ${game.correct_count}/${game.total_rounds}`;
-  };
 
   return (
     <>
@@ -78,20 +44,20 @@ function DashboardPage() {
         {/* HERO SECTION */}
         <section className="dashboard-hero">
           <div>
-            <h1>Welcome back {username}</h1>
+            <h1>Welcome back {user?.username || user?.email || 'Player'}!</h1>
             <p>Track your progress and start a new game</p>
           </div>
           <div className="hero-badge">
             <FaTrophy />
-            <span>Level {Math.floor(stats.games_played / 5) + 1}</span>
+            <span>Level 5</span>
           </div>
         </section>
 
         {/* STATS */}
         <section className="cards-container">
-          <Card title="Games Played" value={loading ? "..." : stats.games_played} />
-          <Card title="Wins" value={loading ? "..." : stats.wins} />
-          <Card title="Top Score" value={loading ? "..." : stats.top_score} />
+          <Card title="Games Played" value={4} />
+          <Card title="Wins" value={18} />
+          <Card title="Top Score" value={781} />
         </section>
 
         {/* PLAY SECTION */}
@@ -101,14 +67,14 @@ function DashboardPage() {
           <div className="btn-container">
             <button
             className="btn primary"
-            onClick={() => setShowModeCards(true)}
+            onClick={() => handleModeSelect(false)}
             >
             <FaGamepad /> Classic
             </button>
 
             <button
             className="btn secondary"
-            onClick={() => setShowModeCards(true)}
+            onClick={() => handleModeSelect(true)}
             >
             <FaUsers /> Multiplayer
             </button>
@@ -124,7 +90,7 @@ function DashboardPage() {
               className="modal"
               onClick={(e) => e.stopPropagation()}
             >
-              <MultiCards />
+              <MultiCards multiplayer={multiplayer} />
             </div>
           </div>
         )}
@@ -133,15 +99,9 @@ function DashboardPage() {
         <section className="activity">
           <h2>Recent Activity</h2>
           <ul>
-            {loading ? (
-              <li>Loading...</li>
-            ) : stats.recent_games.length === 0 ? (
-              <li>No games played yet. Start playing!</li>
-            ) : (
-              stats.recent_games.map((game, idx) => (
-                <li key={game.id || idx}>{formatActivity(game)}</li>
-              ))
-            )}
+            <li> Won a Classic game 4/6</li>
+            <li> Lost a Classic game 2/6</li>
+            <li> Lost a Classic game 2/6</li>
           </ul>
         </section>
 

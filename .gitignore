@@ -8,12 +8,5 @@ __pycache__/
 ml-model/
 frontend/
 screenshots/
+backend/src/.env
 .env
-*.env
-backend/.env
-**/.env
-
-"backend/src/.env" 
-"*.env" 
-".env*" 
-".env" 

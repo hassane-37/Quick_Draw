@@ -41,16 +41,16 @@ export const FormSignIn = () => {
 
       // Prendre en charge le token custom JWT renvoyé par le backend
       const jwtToken = data.token || data?.data?.accessToken; // fallback si ancienne réponse
+
+      const username = await getUserNameByEmail(email); // Récupérer le nom d'utilisateur à partir de l'email
+
       if (!jwtToken) {
         throw new Error('No token returned from server');
       }
 
-      // Stocker le token et les infos utilisateur renvoyées par le backend
+      // Stocker UNIQUEMENT le token (les infos utilisateur seront récupérées via /api/auth/me)
       localStorage.setItem('token', jwtToken);
-      if (data.user) {
-        if (data.user.username) localStorage.setItem('username', data.user.username);
-        if (data.user.email) localStorage.setItem('email', data.user.email);
-      }
+      localStorage.setItem('username', username); 
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -58,6 +58,28 @@ export const FormSignIn = () => {
       setLoading(false);
     }
   };
+
+  const getUserNameByEmail = async (email) => {
+    try {
+      const response = await fetch('http://localhost:4000/api/auth/getUserNameByEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to get username');
+      }
+      return data.username;
+    } catch (error) {
+      console.error('Error fetching username:', error);
+      return null;
+    }
+  };
+
 
   return (
     <>
