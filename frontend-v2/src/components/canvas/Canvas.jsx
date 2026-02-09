@@ -3,12 +3,41 @@ import "./Canvas.css";
 import StatPage from "../../pages/StatePage";
 import { jwtDecode } from "jwt-decode";
 
-const LABELS = ["Bicycle", "Eiffel Tower", "Pizza", "Cat", "Cloud", "Apple", "Tree", "Car", "Sun", "House"];
-const CNN_LABELS = ["Car","Bycicle","Dog","Bird","Hammer","Cat","Apple","House","Tree"];
+// LSTM model labels (10 classes) - used for LSTM predictions
+// const LABELS = ["Bicycle", "Eiffel Tower", "Pizza", "Cat", "Cloud", "Apple", "Tree", "Car", "Sun", "House"];
+const LABELS = [
+  "The Eiffel Tower",  // index 0 ← capital T sorts first!
+  "Apple",             // index 1
+  "Bicycle",           // index 2
+  "Car",               // index 3
+  "Cat",               // index 4
+  "Cloud",             // index 5
+  "House",             // index 6
+  "Pizza",             // index 7
+  "Sun",               // index 8
+  "Tree"               // index 9
+];
+
+// CNN model labels - MUST match LabelEncoder's alphabetical order from training
+// Training classes: ["bicycle", "The Eiffel Tower", "pizza", "cat", "cloud", "apple", "tree", "car", "sun", "house"]
+// ⚠️ CRITICAL: "The Eiffel Tower" has capital T → sorts FIRST in Python (capitals < lowercase in ASCII)
+// After LabelEncoder.fit_transform(): ['The Eiffel Tower', 'apple', 'bicycle', 'car', 'cat', 'cloud', 'house', 'pizza', 'sun', 'tree']
+const CNN_LABELS = [
+  "The Eiffel Tower",  // index 0 ← capital T sorts first!
+  "Apple",             // index 1
+  "Bicycle",           // index 2
+  "Car",               // index 3
+  "Cat",               // index 4
+  "Cloud",             // index 5
+  "House",             // index 6
+  "Pizza",             // index 7
+  "Sun",               // index 8
+  "Tree"               // index 9
+];
 
 export default function DrawingCanvas({ 
   roundsCount = 6, 
-  keywords = ["Tree", "Pizza", "Car", "House", "Cloud","Sun"],
+  keywords = ["The Eiffel Tower", "Apple", "Bicycle", "Car", "Cat", "Cloud", "House", "Pizza", "Sun", "Tree"],
   route = "predict"
 }) {
   const canvasRef = useRef(null);
@@ -24,10 +53,10 @@ export default function DrawingCanvas({
   const [confidence, setConfidence] = useState(0);
   const [gamePrediction, setGamePrediction] = useState([]);
   const [gameOver, setGameOver] = useState(false);
+  const [processedImage, setProcessedImage] = useState(""); // Image du modèle
 
-  if (route === 'predict_cnn') {
-    keywords = ['Apple','House','Cat','Tree','Bycicle','Dog'];
-  }
+  // Select appropriate labels array based on route
+  const currentLabels = route === 'predict_cnn' ? CNN_LABELS : LABELS;
 
   /* ------------------ SAUVEGARDE EN BASE ------------------ */
   const saveGameToBackend = async (predictions) => {
@@ -82,12 +111,22 @@ export default function DrawingCanvas({
 
       if (response.ok) {
         const result = await response.json();
-        if (route=='predict_cnn'){
-          setPrediction(CNN_LABELS[result.predicted_index] || "something...");
+        
+        // Validate predicted_index
+        if (result.predicted_index < 0 || result.predicted_index >= currentLabels.length) {
+          console.error(`Invalid predicted_index: ${result.predicted_index} (expected 0-${currentLabels.length - 1})`);
+          setPrediction("Error: Invalid prediction");
+          return;
         }
-        else{
-        setPrediction(LABELS[result.predicted_index] || "something...");
+        
+        // Set prediction using appropriate labels
+        setPrediction(currentLabels[result.predicted_index]);
+        
+        // Store processed image if available
+        if (result.image_base64) {
+          setProcessedImage(result.image_base64);
         }
+        
         setConfidence(result.confidence_percentage);
       }
     } catch (err) {
@@ -186,6 +225,7 @@ export default function DrawingCanvas({
     setDrawingData([]); 
     setPrediction("");
     setConfidence(0);
+    setProcessedImage(""); // Réinitialiser l'image
   };
 
   const nextRound = () => {
@@ -254,6 +294,14 @@ export default function DrawingCanvas({
           <div className="confidence-tag">{confidence.toFixed(1)}%</div>
         </div>
       )}
+
+      {/* Affichage de l'image vue par le modèle (commenté) */}
+      {/* {processedImage && (
+        <div className="processed-image-preview">
+          <div className="preview-label">Model Input:</div>
+          <img src={processedImage} alt="Processed drawing" />
+        </div>
+      )} */}
 
       <div className="ui-overlay bottom-ui">
         <div className="actions-bar">

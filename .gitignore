@@ -17,3 +17,11 @@ backend/.env
 "*.env" 
 ".env*" 
 ".env" 
+
+# Python virtual environments
+venv/
+env/
+ENV/
+
+# Temporary ML server files
+ml-server/drawing.png

@@ -9,7 +9,8 @@ AWS.config.update({
   sessionToken: process.env.AWS_SESSION_TOKEN
 });
 
-const dynamo = new AWS.DynamoDB.DocumentClient();
+const dynamodb = new AWS.DynamoDB();
+const dynamo = new AWS.DynamoDB.DocumentClient({ service: dynamodb });
 
 // 🧪 TEST : Essayer de scanner la table users
 (async () => {

@@ -24,6 +24,20 @@ app.use(morgan("dev")); //utile pour debugger
 // Pour lire le JSON (limité pour éviter les gros payloads malveillants)
 app.use(express.json({ limit: "5mb" })); 
 
+// Route racine
+app.get("/", (req, res) => {
+  res.json({ 
+    success: true, 
+    message: "Quick Draw API is running! 🎨",
+    availableRoutes: {
+      health: "/api/health",
+      auth: "/api/auth",
+      ml: "/api/ml",
+      games: "/api/games"
+    }
+  });
+});
+
 // Rate limiting global
 app.use("/api", apiLimiter);
 
