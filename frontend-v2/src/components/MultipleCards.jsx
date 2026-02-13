@@ -72,12 +72,6 @@ const MultiCards = ({multiplayer}) => {
               <p>Image-based recognition</p>
             </div>
 
-            <div className="model-card" onClick={() => goToGame("lstm")}>
-              <FaBrain size={30} />
-              <h3>LSTM</h3>
-              <p>Stroke-sequence model</p>
-            </div>
-
           </div>
         </div>
       )}
