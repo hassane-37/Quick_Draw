@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 import "./Canvas.css";
 import StatPage from "../../pages/StatePage";
 
@@ -57,7 +58,7 @@ export default function DrawingCanvas({
 
   const [gamePrediction, setGamePrediction] = useState([]);
   const [gameOver, setGameOver] = useState(false);
-  const [processedImage, setProcessedImage] = useState(""); // Image du modèle
+  const [setProcessedImage] = useState(""); // Image du modèle
 
   // Select appropriate labels array based on route
   const currentLabels = route === 'predict_cnn' ? CNN_LABELS : LABELS;
@@ -74,8 +75,8 @@ export default function DrawingCanvas({
       const decoded = jwtDecode(token);
       const user_id = decoded.sub || decoded.username || decoded["cognito:username"];
 
-      console.log("💾 Saving game for user:", user_id);
-      console.log("📊 Predictions:", predictions);
+      console.log("Saving game for user:", user_id);
+      console.log("Predictions:", predictions);
 
       const response = await fetch("http://localhost:4000/api/games/save", {
         method: "POST",
@@ -93,12 +94,12 @@ export default function DrawingCanvas({
       const data = await response.json();
       
       if (response.ok) {
-        console.log("✅ Game saved successfully:", data);
+        console.log("Game saved successfully:", data);
       } else {
-        console.error("❌ Failed to save game:", data);
+        console.error(" Failed to save game:", data);
       }
     } catch (err) {
-      console.error("❌ Error saving game:", err);
+      console.error("Error saving game:", err);
     }
   };
 
@@ -138,29 +139,6 @@ export default function DrawingCanvas({
     }
   };
 
-  const clearCanvas = () => {
-    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    setDrawingData([]); 
-    setPrediction("");
-    setConfidence(0);
-  };
-
-  const nextRound = () => {
-    
-    setTransition(true);
-    setTimeout(() => {
-      clearCanvas();
-      setTimeLeft(20);
-      setRound((r) => (r + 1 < roundsCount ? r + 1 : 0));
-      setTransition(false);
-    }, 500);
-    setGamePrediction(prev => [...prev, {word: keywords[round], prediction, confidence}]);
-    console.log("Game Predictions so far:", gamePrediction);
-    if (round + 1 === roundsCount) {
-        setGameOver(true);
-    }
-  };
-
  
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -185,7 +163,7 @@ export default function DrawingCanvas({
   useEffect(() => {
     if (timeLeft === 0) {
       const timeoutId = setTimeout(() => {
-        nextRound();
+        // nextRound();
       }, 0);
       return () => clearTimeout(timeoutId);
     }
