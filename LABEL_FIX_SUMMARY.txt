@@ -1,0 +1,172 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║           🔧 CORRECTION - PROBLÈME DE PRÉDICTION RÉSOLU                    ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🐛 PROBLÈME: Le modèle confondait House et Tree, prédisait mal Apple
+
+🔍 CAUSE: Désalignement des labels entre modèle et frontend
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 📊 MAPPING AVANT (INCORRECT)                                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Index  │ Modèle Prédit     │ Frontend Affichait   │ Résultat
+───────┼───────────────────┼──────────────────────┼──────────────────
+  0    │ apple             │ "Bicycle"            │ ❌ Faux!
+  1    │ bicycle           │ "Eiffel Tower"       │ ❌ N'existe pas!
+  2    │ bird              │ "Pizza"              │ ❌ N'existe pas!
+  3    │ car               │ "Cat"                │ ❌ Faux!
+  4    │ cat               │ "Cloud"              │ ❌ N'existe pas!
+  5    │ dog               │ "Apple"              │ ❌ Faux!
+  6    │ hammer            │ "Tree"               │ ❌ Faux!
+  7    │ house             │ "Car"                │ ❌ CONFUSION!
+  8    │ tree              │ "Sun"                │ ❌ CONFUSION!
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ ✅ MAPPING APRÈS (CORRIGÉ)                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Index  │ Modèle Prédit     │ Frontend Affiche     │ Résultat
+───────┼───────────────────┼──────────────────────┼──────────────────
+  0    │ apple             │ "Apple"              │ ✅ Correct!
+  1    │ bicycle           │ "Bicycle"            │ ✅ Correct!
+  2    │ bird              │ "Bird"               │ ✅ Correct!
+  3    │ car               │ "Car"                │ ✅ Correct!
+  4    │ cat               │ "Cat"                │ ✅ Correct!
+  5    │ dog               │ "Dog"                │ ✅ Correct!
+  6    │ hammer            │ "Hammer"             │ ✅ Correct!
+  7    │ house             │ "House"              │ ✅ Correct!
+  8    │ tree              │ "Tree"               │ ✅ Correct!
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🔧 CORRECTION APPLIQUÉE                                                   ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Fichier: frontend-v2/src/components/canvas/Canvas.jsx
+
+AVANT:
+const CNN_LABELS = [
+  "Bicycle", "Eiffel Tower", "Pizza", "Cat", "Cloud",
+  "Apple", "Tree", "Car", "Sun", "House"
+];
+
+APRÈS:
+const CNN_LABELS = [
+  "Apple",    // index 0 ✅
+  "Bicycle",  // index 1 ✅
+  "Bird",     // index 2 ✅
+  "Car",      // index 3 ✅
+  "Cat",      // index 4 ✅
+  "Dog",      // index 5 ✅
+  "Hammer",   // index 6 ✅
+  "House",    // index 7 ✅
+  "Tree"      // index 8 ✅
+];
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🧪 TESTS AVANT/APRÈS                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+TEST 1: Dessiner Apple 🍎
+  AVANT: Prédisait "Bicycle" ❌
+  APRÈS: Prédit "Apple" ✅
+
+TEST 2: Dessiner House 🏠
+  AVANT: Prédisait "Car" ❌ ou "Sun" ❌
+  APRÈS: Prédit "House" ✅
+
+TEST 3: Dessiner Tree 🌲
+  AVANT: Prédisait "Sun" ❌ ou "Car" ❌
+  APRÈS: Prédit "Tree" ✅
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 📋 CLASSES DISPONIBLES                                                    ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+✅ MODÈLE CNN SUPPORTE (9 classes):
+  1. Apple 🍎
+  2. Bicycle 🚲
+  3. Bird 🐦
+  4. Car 🚗
+  5. Cat 🐱
+  6. Dog 🐕
+  7. Hammer 🔨
+  8. House 🏠
+  9. Tree 🌲
+
+❌ NON SUPPORTÉES (n'existent pas dans le modèle):
+  - Eiffel Tower
+  - Pizza
+  - Cloud
+  - Sun
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🚀 COMMENT TESTER                                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+1. Rafraîchir la page (Ctrl+R ou F5)
+
+2. Dessiner chaque classe et vérifier:
+   ┌─────────────────────────────────────────────┐
+   │ Dessinez → Apple                            │
+   │ Devrait afficher: "I see Apple" ✅          │
+   │                                             │
+   │ Dessinez → House                            │
+   │ Devrait afficher: "I see House" ✅          │
+   │                                             │
+   │ Dessinez → Tree                             │
+   │ Devrait afficher: "I see Tree" ✅           │
+   └─────────────────────────────────────────────┘
+
+3. Vérifier l'image Model Input en haut à droite
+   → Doit montrer l'image 64x64 en noir et blanc
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 💡 POURQUOI C'ÉTAIT CASSÉ?                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Le modèle a été entraîné avec LabelEncoder de scikit-learn:
+
+    from sklearn.preprocessing import LabelEncoder
+    encoder = LabelEncoder()
+    df['label'] = encoder.fit_transform(df['word'])
+
+LabelEncoder encode les labels PAR ORDRE ALPHABÉTIQUE automatiquement!
+
+Liste d'entraînement:
+['apple', 'cat', 'dog', 'bird', 'hammer', 'bicycle', 'car', 'house', 'tree']
+
+Ordre après encodage (alphabétique):
+['apple', 'bicycle', 'bird', 'car', 'cat', 'dog', 'hammer', 'house', 'tree']
+   0        1          2       3      4      5      6         7        8
+
+Le frontend utilisait un ordre complètement différent! Voilà pourquoi
+il y avait confusion.
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ ✅ RÉSUMÉ                                                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+Problème:  Labels désalignés entre modèle et frontend
+Cause:     LabelEncoder encode par ordre alphabétique
+Solution:  CNN_LABELS mis à jour avec l'ordre correct
+
+Fichier modifié:
+  ✅ frontend-v2/src/components/canvas/Canvas.jsx
+
+Status: ✅ RÉSOLU - Prêt à tester!
+
+Documentation complète: LABEL_CORRECTION.md
+
+
+════════════════════════════════════════════════════════════════════════════
+           Rafraîchissez la page et testez! 🎨
+════════════════════════════════════════════════════════════════════════════

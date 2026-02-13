@@ -10,3 +10,19 @@ frontend/
 screenshots/
 backend/src/.env
 .env
+*.env
+backend/.env
+**/.env
+
+"backend/src/.env" 
+"*.env" 
+".env*" 
+".env" 
+
+# Python virtual environments
+venv/
+env/
+ENV/
+
+# Temporary ML server files
+ml-server/drawing.png

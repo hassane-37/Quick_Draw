@@ -1,0 +1,242 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║          🖼️ VISUALISATION IMAGE D'ENTRÉE - GUIDE RAPIDE                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+✅ FONCTIONNALITÉ AJOUTÉE: Voir l'image 64x64 présentée au modèle
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🎯 TESTER EN 3 ÉTAPES                                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+1. LANCER LE ML SERVER
+   $ cd Quick_Draw/ml-server
+   $ python ml_server.py
+   [Attendre: Uvicorn running on http://0.0.0.0:8000]
+
+2. LANCER LE FRONTEND
+   $ cd Quick_Draw/frontend-v2
+   $ npm run dev
+   [Attendre: http://localhost:5173]
+
+3. TESTER
+   - Ouvrir http://localhost:5173
+   - Aller au Canvas
+   - Dessiner quelque chose
+   - 👀 REGARDER EN HAUT À DROITE!
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 📍 OÙ SE TROUVE L'IMAGE?                                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DESKTOP:
+┌──────────────────────────────────────────────────────────────┐
+│ [Round 1/6]  [Draw: Apple]  [20]                            │
+│                                            ┌───────────────┐  │
+│                                            │ Model Input:  │  │
+│                                            │  [Image 64x64]│  │
+│                                            └───────────────┘  │
+│                                                               │
+│                   [VOTRE DESSIN ICI]                          │
+│                                                               │
+│                  [I see Apple 🍎 87.4%]                       │
+│                                                               │
+│                   [Clear]    [Done]                           │
+└──────────────────────────────────────────────────────────────┘
+
+MOBILE:
+┌────────────────────────┐
+│  [Draw: Apple] [20]    │
+│                        │
+│   [VOTRE DESSIN]       │
+│                        │
+│  [I see Apple 87.4%]   │
+│                        │
+│            ┌─────────┐ │
+│  [Clear]   │ Model   │ │
+│  [Done]    │ Input   │ │
+│            │ [Image] │ │
+│            └─────────┘ │
+└────────────────────────┘
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🔍 CE QUE VOUS VERREZ                                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+IMAGE AFFICHÉE (120x120px à l'écran):
+  ┌─────────────────┐
+  │ Model Input:    │
+  │ ┌─────────────┐ │
+  │ │████████     │ │  ← Image 64x64 pixelisée
+  │ │██    ██     │ │     Fond: Blanc
+  │ │██    ██     │ │     Traits: Noir
+  │ │████████     │ │
+  │ └─────────────┘ │
+  └─────────────────┘
+
+CARACTÉRISTIQUES:
+  ✓ Format: PNG 64x64 pixels
+  ✓ Style: Pixelisé (pour voir les détails)
+  ✓ Bordure: Noire 2px
+  ✓ Animation: Slide in depuis la droite
+  ✓ Disparaît: Quand vous effacez
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🔧 FICHIERS MODIFIÉS                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+1. Canvas.jsx (Frontend)
+   ✅ État ajouté: const [processedImage, setProcessedImage] = useState("");
+   ✅ Récupération: setProcessedImage(result.image_base64);
+   ✅ Affichage: <img src={processedImage} />
+
+2. ml_server.py (Backend)
+   ✅ Génération image: vector_to_image(data)
+   ✅ Conversion base64: base64.b64encode(image)
+   ✅ Retour API: image_base64 dans PredictionResponse
+
+3. Canvas.css
+   ✅ Déjà présent: .processed-image-preview avec styles
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 💡 POURQUOI C'EST UTILE?                                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+✓ DÉBOGAGE
+  → Voir si le dessin est correctement converti
+  → Détecter les problèmes de normalisation
+  → Vérifier que les traits ne sont pas coupés
+
+✓ COMPRÉHENSION
+  → Comprendre ce que "voit" le modèle
+  → Expliquer pourquoi les prédictions échouent
+  → Améliorer la qualité des dessins
+
+✓ FEEDBACK VISUEL
+  → Transparence sur le processus
+  → Expérience éducative
+  → Confiance utilisateur
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🎨 EXEMPLE VISUEL                                                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+VOTRE DESSIN (Canvas 1920x1080):
+     🍎
+   /   \
+  |  ⚫  |
+   \___/
+
+           ↓ Conversion
+
+IMAGE DU MODÈLE (64x64):
+  ████████
+  ██    ██
+  ██    ██   ← Exactement ce que le CNN voit!
+  ████████
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🐛 PROBLÈMES COURANTS                                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+❌ L'image n'apparaît pas
+   → Vérifier que le ML Server est lancé
+   → Ouvrir F12 et regarder la console
+   → Vérifier la réponse API contient "image_base64"
+
+❌ L'image est floue
+   → NORMAL! C'est une image 64x64 agrandie
+   → Le style "pixelated" est volontaire
+
+❌ L'image ne correspond pas
+   → Vérifier le format: [[dx, dy, pen], ...]
+   → Regarder les logs du ML Server
+   → Vérifier vector_to_image() dans ml_server.py
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ ⚙️ CONFIGURATION                                                          ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+CHANGER LA TAILLE:
+  Dans Canvas.css:
+  .processed-image-preview img {
+    width: 150px;   /* Au lieu de 120px */
+    height: 150px;
+  }
+
+CHANGER LA POSITION:
+  Dans Canvas.css:
+  .processed-image-preview {
+    top: 120px;     /* Vertical */
+    right: 40px;    /* ou left: 40px; pour gauche */
+  }
+
+DÉSACTIVER L'IMAGE:
+  Dans Canvas.jsx, commenter:
+  {processedImage && (
+    <div className="processed-image-preview">...</div>
+  )}
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 📊 FLUX DE DONNÉES                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+1. FRONTEND: Collecte points [dx, dy, pen]
+             ↓
+2. FRONTEND: Envoie POST /predict_cnn
+             ↓
+3. BACKEND:  Convertit en image 64x64
+             ├─→ Deltas → Coordonnées absolues
+             ├─→ Normalisation
+             └─→ Dessin sur canvas PIL
+             ↓
+4. BACKEND:  Conversion image → base64
+             ↓
+5. BACKEND:  Inférence CNN sur l'image
+             ↓
+6. BACKEND:  Retour JSON:
+             {
+               "predicted_index": 5,
+               "confidence": 87.43,
+               "image_base64": "data:image/png;base64,..."
+             }
+             ↓
+7. FRONTEND: Affiche prédiction + image!
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ ✅ CHECKLIST                                                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+[ ] ML Server lancé (python ml_server.py)
+[ ] Frontend lancé (npm run dev)
+[ ] Page Canvas ouverte (http://localhost:5173)
+[ ] Dessiner quelque chose
+[ ] Image apparaît en haut à droite ✅
+[ ] Image correspond au dessin ✅
+[ ] Image disparaît au Clear ✅
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ 🎉 RÉSUMÉ                                                                 ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+✅ Fonctionnalité: Visualisation image 64x64
+✅ Position: Haut droite (desktop), Bas droite (mobile)
+✅ Format: PNG base64
+✅ Modèles: LSTM et CNN (les deux)
+✅ Animation: Fluide, style Neo-Brutalism
+✅ Utilité: Débogage + Transparence
+
+POUR TESTER: Dessinez et regardez en haut à droite! 🎨
+
+════════════════════════════════════════════════════════════════════════════
+      Documentation complète: VISUALISATION_IMAGE.md
+════════════════════════════════════════════════════════════════════════════
